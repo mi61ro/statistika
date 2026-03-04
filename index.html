@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="sk" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futbalove Statistiky</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e14;--panel:#111520;--card:#161b27;--border:#1f2740;
+  --gold:#f0c040;--blue:#4a9eff;--green:#3ddc84;--red:#ff5555;--orange:#ff9933;--muted:#4a5580;
+  --text:#d0d8f0;--white:#eef2ff;
+  --row-hover:#161d30;--thead:#0e1422;--tbody-border:#151b2e;
+  --input-bg:#0d1020;--dot-no:#2a3040;--dot-no-border:#3a4560;
+  --modal-bg:rgba(0,0,0,0.78);--shadow:0 4px 24px rgba(0,0,0,0.5);
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--panel:#ffffff;--card:#e8edf5;--border:#c8d4e8;
+  --gold:#b07800;--blue:#1a6fd4;--green:#1a8a50;--red:#cc2222;--orange:#cc6600;--muted:#6a7fa0;
+  --text:#1a2540;--white:#0a1020;
+  --row-hover:#edf2fc;--thead:#dde5f5;--tbody-border:#dde5f5;
+  --input-bg:#f8faff;--dot-no:#c8d4e8;--dot-no-border:#a0b4d0;
+  --modal-bg:rgba(0,0,50,0.45);--shadow:0 4px 24px rgba(0,0,80,0.12);
+}
+body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;
+  min-height:100vh;padding:1rem;transition:background 0.3s,color 0.3s;
+  background-image:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(13,21,48,0.6) 0%,transparent 70%)}
+[data-theme="light"] body{background-image:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(200,220,255,0.4) 0%,transparent 70%)}
+
+/* HEADER */
+.header-row{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:0.2rem;flex-wrap:wrap}
+h1{font-family:'Oswald',sans-serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700;
+  color:var(--gold);letter-spacing:0.06em;text-transform:uppercase}
+.sub{text-align:center;color:var(--muted);font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1rem}
+.theme-btn{background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:0.3rem 0.85rem;font-size:0.85rem;cursor:pointer;color:var(--text);transition:all 0.2s}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* LEAGUE BAR */
+.league-bar{max-width:1200px;margin:0 auto 0.9rem;background:var(--panel);
+  border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem;
+  display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;box-shadow:var(--shadow)}
+.league-bar-label{font-family:'Oswald',sans-serif;font-size:0.78rem;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.league-tabs{display:flex;gap:0.35rem;flex-wrap:wrap;flex:1}
+.ltab{background:var(--card);border:1px solid var(--border);border-radius:6px;
+  padding:0.3rem 0.65rem;font-size:0.8rem;cursor:pointer;color:var(--muted);
+  transition:all 0.15s;display:flex;align-items:center;gap:0.28rem;white-space:nowrap;
+  font-family:'Source Sans 3',sans-serif;font-weight:600;user-select:none}
+.ltab:hover{color:var(--text);border-color:var(--muted)}
+.ltab.active{background:#1a2848;color:var(--gold);border-color:var(--gold)}
+.ltab-cnt{font-size:0.65rem;background:rgba(255,255,255,0.07);border-radius:3px;
+  padding:0.02rem 0.28rem;margin-left:0.1rem;color:var(--muted)}
+.ltab.active .ltab-cnt{color:var(--gold);background:rgba(240,192,64,0.14)}
+.league-bar-actions{display:flex;gap:0.35rem;flex-shrink:0}
+.btn-sm{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:6px;padding:0.28rem 0.6rem;font-size:0.78rem;cursor:pointer;font-family:'Source Sans 3',sans-serif}
+.btn-sm:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red)}
+
+/* LAYOUT */
+.top-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:1200px;margin:0 auto 0.9rem}
+@media(max-width:700px){.top-grid{grid-template-columns:1fr}}
+.section-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1rem;box-shadow:var(--shadow)}
+.section-title{font-family:'Oswald',sans-serif;font-size:0.92rem;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--blue);margin-bottom:0.65rem;display:flex;align-items:center;gap:0.4rem}
+
+textarea{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);font-family:'Source Sans 3',monospace;font-size:0.8rem;padding:0.6rem;
+  resize:vertical;outline:none;transition:border-color 0.2s;line-height:1.5}
+textarea:focus{border-color:var(--blue)}
+
+/* COLLAPSIBLE PANELS */
+.col-panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  max-width:1200px;margin:0 auto 0.8rem;box-shadow:var(--shadow);overflow:hidden}
+.col-header{display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;padding:0.75rem 1rem}
+.col-title{font-family:'Oswald',sans-serif;font-size:0.9rem;letter-spacing:0.1em;
+  text-transform:uppercase;display:flex;align-items:center;gap:0.4rem}
+.col-toggle{font-size:0.78rem;color:var(--muted)}
+.col-body{max-height:0;overflow:hidden;transition:max-height 0.38s ease}
+.col-body.open{max-height:700px}
+.col-inner{padding:0 1rem 1rem}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap}
+button{cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:600;border:none;
+  border-radius:6px;transition:all 0.18s;font-size:0.79rem;padding:0.38rem 0.8rem}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.btn-save{background:var(--green);color:#fff}
+.btn-save:hover{filter:brightness(1.12)}
+.btn-load{background:var(--card);color:var(--blue);border:1px solid var(--border)}
+.btn-load:hover{border-color:var(--blue)}
+.btn-append{background:#2a4020;color:#7ddc84;border:1px solid #3a6030}
+[data-theme="light"] .btn-append{background:#d0f0d8;color:#1a7030;border:1px solid #8acc99}
+.btn-append:hover{filter:brightness(1.12)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid var(--border)}
+.btn-danger:hover{background:rgba(255,85,85,0.1);border-color:var(--red)}
+
+/* FILTER BAR */
+.filter-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:0.75rem 1rem;max-width:1200px;margin:0 auto 0.9rem;display:flex;
+  gap:0.8rem;align-items:flex-end;flex-wrap:wrap;box-shadow:var(--shadow)}
+.filter-group{display:flex;flex-direction:column;gap:0.22rem}
+.filter-label{font-size:0.67rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+select{background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:'Source Sans 3',sans-serif;font-size:0.83rem;padding:0.38rem 0.6rem;outline:none;cursor:pointer}
+select:focus{border-color:var(--gold)}
+.filter-info{margin-left:auto;font-size:0.73rem;color:var(--muted);align-self:flex-end}
+
+/* TABLES */
+.tables-area{max-width:1200px;margin:0 auto}
+.tables-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1rem}
+.tbl-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+.tbl-head{padding:0.58rem 0.9rem;background:var(--card);border-bottom:1px solid var(--border);
+  font-family:'Oswald',sans-serif;font-size:0.86rem;letter-spacing:0.1em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;gap:0.4rem}
+.tbl-head-label{cursor:help;flex:1}
+.badge{font-size:0.63rem;background:rgba(74,158,255,0.15);color:var(--blue);
+  padding:0.13rem 0.42rem;border-radius:4px;flex-shrink:0}
+.badge-ht1{background:rgba(240,192,64,0.15)!important;color:var(--gold)!important}
+/* scroll wrapper inside each card */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-scroll::-webkit-scrollbar{height:4px}
+.tbl-scroll::-webkit-scrollbar-track{background:var(--card)}
+.tbl-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.tbl-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:0.79rem;min-width:660px}
+thead th{background:var(--thead);color:var(--muted);font-size:0.62rem;letter-spacing:0.09em;
+  text-transform:uppercase;padding:0.42rem 0.48rem;text-align:center;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:2;white-space:nowrap;cursor:help}
+thead th.left{text-align:left}
+/* sticky team column */
+thead th.col-team, td.col-team{
+  position:sticky;left:0;z-index:3;background:var(--thead);min-width:110px;max-width:140px}
+td.col-team{background:var(--panel);z-index:1}
+tbody tr:hover td.col-team{background:var(--row-hover)}
+tbody tr{border-bottom:1px solid var(--tbody-border);transition:background 0.1s;animation:rowIn 0.2s ease}
+tbody tr:hover{background:var(--row-hover)}
+tbody tr:last-child{border-bottom:none}
+@keyframes rowIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+td{padding:0.4rem 0.48rem;text-align:center;white-space:nowrap}
+td.left{text-align:left}
+.rank-num{color:var(--muted);font-size:0.68rem}
+.goals-num{font-family:'Oswald',sans-serif;font-size:1rem;color:var(--gold)}
+.pts{font-family:'Oswald',sans-serif;font-size:0.92rem;color:var(--green)}
+.w{color:var(--green)}.d{color:#f0b040}.l{color:var(--red)}
+[data-theme="light"] .d{color:#b07010}
+.team-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;
+  display:inline-block;font-weight:600;color:var(--white);vertical-align:middle}
+.clickable-team{cursor:pointer}
+.clickable-team:hover .team-name-text{color:var(--gold);text-decoration:underline dotted}
+
+/* STREAKS */
+.streaks{display:flex;gap:3px;align-items:center;justify-content:flex-end}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:transform 0.12s;display:inline-block}
+.dot:hover{transform:scale(1.6)}
+.dot-yes{background:var(--green);box-shadow:0 0 4px rgba(61,220,132,0.55)}
+.dot-no{background:var(--dot-no);border:1px solid var(--dot-no-border)}
+.dot-draw{background:#f0b040;box-shadow:0 0 4px rgba(240,176,64,0.5)}
+.dot-loss{background:var(--red);box-shadow:0 0 4px rgba(255,85,85,0.4)}
+.dot-ht1{background:var(--gold);box-shadow:0 0 4px rgba(240,192,64,0.5)}
+.dot-ht2{background:var(--green);box-shadow:0 0 4px rgba(61,220,132,0.5)}
+.dot-eq{background:var(--blue);box-shadow:0 0 4px rgba(74,158,255,0.5)}
+.dot-btts-yes{background:var(--green);box-shadow:0 0 4px rgba(61,220,132,0.55)}
+.dot-btts-no{background:var(--red);box-shadow:0 0 4px rgba(255,85,85,0.4)}
+
+/* PERCENT */
+.pct-bar-wrap{display:flex;align-items:center;gap:0.28rem;justify-content:flex-end}
+.pct-val{font-family:'Oswald',sans-serif;font-size:0.8rem;min-width:32px;text-align:right}
+.pct-high{color:var(--green)}.pct-mid{color:var(--gold)}.pct-low{color:var(--red)}
+.pct-bar{width:30px;height:4px;border-radius:3px;background:var(--border);overflow:hidden}
+.pct-bar-fill{height:100%;border-radius:3px}
+
+/* STATUS */
+.status-line{max-width:1200px;margin:0 auto 0.5rem;font-size:0.77rem;color:var(--muted);text-align:center}
+.status-line.ok{color:var(--green)}.status-line.err{color:var(--red)}.status-line.warn{color:var(--gold)}
+.no-data{text-align:center;padding:1.2rem;color:var(--muted);font-style:italic;font-size:0.8rem}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity 0.2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;
+  transform:translateY(12px);transition:transform 0.2s;overflow:hidden;box-shadow:var(--shadow)}
+.modal-overlay.open .modal-box{transform:none}
+.modal-header{padding:0.8rem 1rem;background:var(--card);border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-shrink:0}
+.modal-title{font-family:'Oswald',sans-serif;font-size:1.1rem;letter-spacing:0.08em;color:var(--gold);text-transform:uppercase}
+.modal-sub{font-size:0.68rem;color:var(--muted);margin-top:0.1rem}
+.modal-close{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:6px;padding:0.22rem 0.55rem;font-size:0.78rem;cursor:pointer}
+.modal-close:hover{color:var(--red);border-color:var(--red)}
+.modal-body{overflow-y:auto;flex:1}
+
+/* === MATCH ROW IN MODAL === */
+.mm-row{border-bottom:1px solid var(--tbody-border);border-left:3px solid transparent;
+  padding:0.5rem 0.8rem;transition:background 0.1s;cursor:default}
+.mm-row:last-child{border-bottom:none}
+.mm-row:hover{background:var(--row-hover)}
+.mm-row.res-w{border-left-color:var(--green)}
+.mm-row.res-d{border-left-color:#f0b040}
+.mm-row.res-l{border-left-color:var(--red)}
+/* top line: home — scores — away — check */
+.mm-top{display:grid;grid-template-columns:1fr auto 1fr auto;gap:0.5rem;align-items:center}
+.mm-home{text-align:right;font-weight:600;font-size:0.82rem}
+.mm-away{text-align:left;font-size:0.82rem;color:var(--muted)}
+.mm-team-hl{color:var(--white)!important}
+.mm-check{font-size:0.88rem;font-weight:700;min-width:18px;text-align:center}
+/* score breakdown */
+.mm-scores{display:flex;gap:0.55rem;margin-top:0.38rem;justify-content:center;flex-wrap:wrap}
+.mm-sbox{display:flex;flex-direction:column;align-items:center;min-width:58px}
+.mm-slabel{font-size:0.59rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:0.12rem}
+.mm-sval{font-family:'Oswald',sans-serif;font-size:0.9rem;padding:0.06rem 0.42rem;
+  border-radius:5px;border:1px solid;white-space:nowrap}
+.mm-sval.ht {color:var(--gold);border-color:rgba(240,192,64,0.3);background:rgba(240,192,64,0.07)}
+.mm-sval.ht2{color:var(--orange);border-color:rgba(255,153,51,0.3);background:rgba(255,153,51,0.07)}
+.mm-sval.ft {color:var(--green);border-color:rgba(61,220,132,0.3);background:rgba(61,220,132,0.07)}
+.mm-sval.ft.sc-d{color:#f0b040;border-color:rgba(240,176,64,0.3);background:rgba(240,176,64,0.07)}
+.mm-sval.ft.sc-l{color:var(--red);border-color:rgba(255,85,85,0.3);background:rgba(255,85,85,0.07)}
+
+/* modal streaks / context */
+.modal-streak-row{display:flex;align-items:center;gap:0.5rem;padding:0.42rem 0.8rem;
+  border-bottom:1px solid var(--tbody-border);font-size:0.74rem}
+.modal-streak-label{color:var(--muted);min-width:80px}
+.modal-context{font-size:0.67rem;color:var(--muted);background:var(--card);
+  border-radius:6px;padding:0.32rem 0.7rem;margin:0.5rem 0.8rem;text-align:center}
+.modal-legend{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;
+  font-size:0.68rem;color:var(--muted);padding:0.28rem 0.8rem 0.38rem;border-bottom:1px solid var(--tbody-border)}
+.ml-item{display:flex;align-items:center;gap:0.28rem}
+.ml-swatch{width:12px;height:7px;border-radius:3px;border:1px solid}
+
+/* QUICK ENTRY */
+.qe-row{display:flex;gap:0.5rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:0.6rem}
+.qe-score-group{display:flex;flex-direction:column;align-items:center;gap:0.1rem}
+.qe-label{font-size:0.63rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase}
+.qe-score-wrap{display:flex;align-items:center;gap:0.22rem}
+select.team-sel{flex:1;min-width:140px;font-size:0.82rem;padding:0.45rem 0.5rem;
+  background:var(--input-bg);border:1px solid var(--border);border-radius:7px;
+  color:var(--white);font-weight:600;cursor:pointer}
+select.team-sel:focus{border-color:var(--gold)}
+input.score-inp{width:40px;text-align:center;background:var(--input-bg);border:1px solid var(--border);
+  border-radius:7px;color:var(--gold);font-family:'Oswald',sans-serif;font-size:1.1rem;
+  padding:0.36rem 0.2rem;outline:none;transition:border-color 0.2s}
+input.score-inp:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,192,64,0.18)}
+input.score-inp::-webkit-inner-spin-button,input.score-inp::-webkit-outer-spin-button{opacity:0}
+.qe-colon{font-family:'Oswald',sans-serif;font-size:1.15rem;color:var(--muted);line-height:1}
+.qe-sep{font-size:0.85rem;color:var(--muted);padding:0 0.1rem;align-self:center}
+.btn-add-match{background:var(--gold);color:#000;padding:0.45rem 1rem;border-radius:7px;white-space:nowrap;align-self:flex-end}
+.btn-add-match:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.qe-preview{font-size:0.75rem;font-family:monospace;background:var(--card);
+  border:1px solid var(--border);border-radius:5px;padding:0.26rem 0.5rem;min-height:1.3em;margin-top:0.35rem}
+.qe-hist-title{font-size:0.67rem;color:var(--muted);letter-spacing:0.09em;text-transform:uppercase;margin:0.55rem 0 0.28rem}
+.qe-hist-list{display:flex;flex-direction:column;gap:0.2rem;max-height:120px;overflow-y:auto}
+.qe-hist-item{display:flex;justify-content:space-between;align-items:center;
+  background:var(--card);border:1px solid var(--border);border-radius:5px;padding:0.22rem 0.5rem;font-size:0.77rem}
+.qe-hist-score{font-family:'Oswald',sans-serif;color:var(--gold)}
+.qe-hist-del{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:0.8rem;padding:0.05rem 0.28rem}
+.qe-hist-del:hover{color:var(--red)}
+/* VOICE PANEL */
+.voice-btn{width:72px;height:72px;border-radius:50%;border:3px solid var(--border);
+  background:var(--card);color:var(--text);font-size:1.9rem;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;transition:all 0.2s;flex-shrink:0;padding:0}
+.voice-btn:hover{border-color:var(--blue);transform:scale(1.06)}
+.voice-btn.listening{border-color:var(--red);background:rgba(255,85,85,0.12);animation:vpulse 1.2s infinite}
+.voice-btn.ok{border-color:var(--green);background:rgba(61,220,132,0.12)}
+@keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,85,85,0.4)}50%{box-shadow:0 0 0 14px rgba(255,85,85,0)}}
+.voice-transcript{min-height:2.4rem;background:var(--input-bg);border:1px solid var(--border);
+  border-radius:8px;padding:0.55rem 0.85rem;font-size:0.88rem;color:var(--muted);
+  font-style:italic;line-height:1.5;transition:border-color 0.2s;flex:1}
+.voice-transcript.vactive{border-color:var(--red);color:var(--white);font-style:normal}
+.voice-transcript.vdone{border-color:var(--blue);color:var(--text);font-style:normal}
+.vresult{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.8rem 1rem;margin-top:0.65rem}
+.vresult-row{display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap;margin-bottom:0.5rem}
+.vpill{background:var(--input-bg);border:1px solid var(--border);border-radius:6px;
+  padding:0.28rem 0.65rem;font-size:0.81rem;font-weight:600;color:var(--white);
+  cursor:pointer;transition:all 0.15s;min-width:90px;text-align:center}
+.vpill:hover,.vpill.sel{border-color:var(--gold);color:var(--gold)}
+.vpill.bad{border-color:var(--red);color:var(--red)}
+.vscore{font-family:'Oswald',sans-serif;font-size:1.35rem;color:var(--gold);
+  padding:0.08rem 0.45rem;background:var(--input-bg);border-radius:5px;border:1px solid var(--border)}
+.vfield{display:flex;flex-direction:column;align-items:center;gap:0.1rem}
+.vflabel{font-size:0.57rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em}
+.vex{background:var(--input-bg);border:1px solid var(--border);border-radius:5px;
+  padding:0.2rem 0.55rem;font-size:0.72rem;font-family:monospace;color:var(--blue);
+  cursor:pointer;transition:all 0.15s;display:inline-block;margin:0.12rem}
+.vex:hover{border-color:var(--blue);background:rgba(74,158,255,0.08)}
+.vteam-list{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.4rem;max-height:120px;overflow-y:auto}
+</style>
+</head>
+<body>
+
+<div class="header-row">
+  <h1>&#9917; Futbalove Statistiky</h1>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">&#127769; Nocny</button>
+</div>
+<p class="sub">Viac lig &middot; Tabulky &middot; Streaks &middot; BTTS &middot; Analyza</p>
+
+<!-- LEAGUE BAR -->
+<div class="league-bar">
+  <span class="league-bar-label">&#127942; Liga:</span>
+  <div class="league-tabs" id="leagueTabs"></div>
+  <div class="league-bar-actions">
+    <button class="btn-sm" onclick="addLeague()">+ Nova liga</button>
+    <button class="btn-sm danger" onclick="deleteLeague()" title="Zmazat aktivnu ligu">&#128465;</button>
+  </div>
+</div>
+
+<!-- TEAMS + RESULTS -->
+<div class="top-grid">
+  <div class="section-card">
+    <div class="section-title"><span>&#127967;</span> Timy ligy</div>
+    <textarea id="teamsBox" rows="9" placeholder="Vloz timy, kazdy na novy riadok:
+Arsenal
+Aston Villa
+Chelsea
+Liverpool
+..."></textarea>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="parseTeams()">&#10004; Nacitat</button>
+      <button class="btn-save" onclick="saveLeagueData()">&#128190; Ulozit</button>
+      <button class="btn-load" onclick="loadLeagueData()">&#128194; Obnovit</button>
+      <button class="btn-danger" onclick="clearTeams()">&#128465; Timy</button>
+    </div>
+    <div id="teamsStatus" class="status-line" style="margin-top:0.4rem"></div>
+  </div>
+  <div class="section-card">
+    <div class="section-title"><span>&#128203;</span> Vysledky zapasov</div>
+    <textarea id="resultsBox" rows="9" placeholder="Formaty:
+Format 1 (HT + FT):  Arsenal - Chelsea 1:0 2:1
+Format 2 (FT (HT)):  Everton - Tottenham 0:3 (0:2)
+Format 3 (len HT):   Arsenal - Crystal Palace 1:0"></textarea>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="parseResults()">&#10004; Nacitat</button>
+      <button class="btn-save" onclick="saveLeagueData()">&#128190; Ulozit</button>
+      <button class="btn-load" onclick="loadLeagueData()">&#128194; Obnovit</button>
+      <button class="btn-danger" onclick="clearResults()">&#128465; Vysledky</button>
+    </div>
+    <div id="resultsStatus" class="status-line" style="margin-top:0.4rem"></div>
+  </div>
+</div>
+
+<!-- VOICE ENTRY -->
+<div class="col-panel">
+  <div class="col-header" onclick="togglePanel('voice')">
+    <div class="col-title" style="color:#ff6b9d"><span>🎤</span> Hlasové zadávanie výsledku</div>
+    <span class="col-toggle" id="voiceToggle">&#9660;</span>
+  </div>
+  <div class="col-body" id="voiceBody">
+    <div class="col-inner">
+
+      <!-- Hlavné tlačidlo mikrofónu -->
+      <div style="display:flex;gap:1rem;align-items:center;margin-bottom:0.8rem">
+        <button class="voice-btn" id="voiceMicBtn" onclick="toggleVoice()">🎤</button>
+        <div style="flex:1">
+          <div id="voiceTranscript" class="voice-transcript">Tapni 🎤 a povedz výsledok...</div>
+        </div>
+      </div>
+
+      <!-- Alebo napíš ručne -->
+      <div style="font-size:0.68rem;color:var(--muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.08em">Alebo napíš / vlož text:</div>
+      <div style="position:relative;margin-bottom:0.6rem">
+        <input type="text" id="voiceInput"
+          placeholder="napr: Arsenal Chelsea 1 0 2 1"
+          oninput="voiceOnInput(this.value)"
+          style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;
+            color:var(--text);font-family:'Source Sans 3',sans-serif;font-size:0.95rem;
+            padding:0.65rem 2.5rem 0.65rem 0.9rem;outline:none;box-sizing:border-box;transition:border-color 0.2s"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button onclick="voiceClearInput()"
+          style="position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);
+            background:none;border:none;color:var(--muted);font-size:1.1rem;padding:0.3rem;cursor:pointer">&#x2715;</button>
+      </div>
+
+      <!-- Príklady -->
+      <div style="margin-bottom:0.65rem">
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:0.28rem;text-transform:uppercase;letter-spacing:0.08em">Príklady — tapni pre vyplnenie:</div>
+        <div style="display:flex;flex-wrap:wrap">
+          <span class="vex" onclick="voiceFillExample(this.textContent)">Arsenal Chelsea 1 0 2 1</span>
+          <span class="vex" onclick="voiceFillExample(this.textContent)">Liverpool Everton 0 0 0 0</span>
+          <span class="vex" onclick="voiceFillExample(this.textContent)">Real Madrid Barcelona 2 1 3 2</span>
+          <span class="vex" onclick="voiceFillExample(this.textContent)">Slavia Sparta jedna nula dve jedna</span>
+        </div>
+      </div>
+
+      <!-- Výsledok parsovania -->
+      <div class="vresult" id="voiceResult" style="display:none">
+        <div style="font-size:0.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.45rem">Rozoznané — skontroluj a potvrď:</div>
+        <div class="vresult-row" id="voiceResultRow"></div>
+        <div id="voiceTeamPicker" style="display:none;margin-top:0.5rem">
+          <div id="voiceTeamPickerLabel" style="font-size:0.7rem;color:var(--gold);margin-bottom:0.3rem">Vyber tím:</div>
+          <div class="vteam-list" id="voiceTeamList"></div>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.65rem;flex-wrap:wrap">
+          <button class="btn-save" onclick="voiceConfirm()" id="voiceConfirmBtn">&#10004; Pridať zápas</button>
+          <button class="btn-danger" onclick="voiceReset()">&#10007; Zrušiť</button>
+        </div>
+      </div>
+      <div id="voiceStatusLine" style="font-size:0.75rem;margin-top:0.35rem"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ENTRY -->
+<div class="col-panel">
+  <div class="col-header" onclick="togglePanel('qe')">
+    <div class="col-title" style="color:var(--gold)"><span>&#9917;</span> Priame zadanie vysledku</div>
+    <span class="col-toggle" id="qeToggle">&#9660;</span>
+  </div>
+  <div class="col-body" id="qeBody">
+    <div class="col-inner">
+      <div class="qe-row">
+        <select class="team-sel" id="qeHome" onchange="updatePreview()"><option value="">&#8212; Domaci &#8212;</option></select>
+        <div class="qe-score-group">
+          <div class="qe-label">1. Polcas</div>
+          <div class="qe-score-wrap">
+            <input class="score-inp" type="number" id="qeHT1" value="0" min="0" max="20" oninput="updatePreview()">
+            <span class="qe-colon">:</span>
+            <input class="score-inp" type="number" id="qeHT2" value="0" min="0" max="20" oninput="updatePreview()">
+          </div>
+        </div>
+        <span class="qe-sep">VS</span>
+        <div class="qe-score-group">
+          <div class="qe-label">Konecny</div>
+          <div class="qe-score-wrap">
+            <input class="score-inp" type="number" id="qeFT1" value="0" min="0" max="20" oninput="updatePreview()">
+            <span class="qe-colon">:</span>
+            <input class="score-inp" type="number" id="qeFT2" value="0" min="0" max="20" oninput="updatePreview()">
+          </div>
+        </div>
+        <span class="qe-sep">&#8211;</span>
+        <select class="team-sel" id="qeAway" onchange="updatePreview()"><option value="">&#8212; Hostujuci &#8212;</option></select>
+        <button class="btn-add-match" onclick="addMatchFromQE()">+ Pridat</button>
+      </div>
+      <div class="qe-preview" id="qePreview" style="color:var(--muted)">Vyber timy a zadaj skore...</div>
+      <div class="qe-hist-title">Naposledy pridane</div>
+      <div class="qe-hist-list" id="qeHistList"><div style="color:var(--muted);font-size:0.76rem;font-style:italic">Ziadne zaznamy</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- APPEND -->
+<div class="col-panel">
+  <div class="col-header" onclick="togglePanel('append')">
+    <div class="col-title" style="color:var(--blue)"><span>+</span> Doplnit nove vysledky (text)</div>
+    <span class="col-toggle" id="appendToggle">&#9660;</span>
+  </div>
+  <div class="col-body" id="appendBody">
+    <div class="col-inner">
+      <textarea id="appendBox" rows="5" placeholder="Vloz iba nove vysledky (pridaju sa k existujucim):
+Arsenal - Chelsea 1:0 2:1"></textarea>
+      <div class="btn-row">
+        <button class="btn-append" onclick="appendResults()">+ Pridat k vysledkom</button>
+        <button class="btn-save" onclick="saveLeagueData()">&#128190; Ulozit vsetko</button>
+      </div>
+      <div id="appendStatus" class="status-line" style="margin-top:0.4rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-card">
+  <div class="filter-group">
+    <div class="filter-label">Tabulka</div>
+    <select id="tableType" onchange="renderAll()">
+      <option value="all">Vsetky</option>
+      <option value="overall">Celkova</option>
+      <option value="home">Doma</option>
+      <option value="away">Von</option>
+      <option value="ht">1. Polcas</option>
+      <option value="ht2">2. Polcas</option>
+      <option value="ht_home">1.P Doma</option>
+      <option value="ht_away">1.P Von</option>
+      <option value="ht2_home">2.P Doma</option>
+      <option value="ht2_away">2.P Von</option>
+      <option value="htcomp">HT1 vs HT2</option>
+      <option disabled>&#8212;&#8212;&#8212;&#8212;&#8212;</option>
+      <option value="btts_ft">BTTS Celkovo</option>
+      <option value="btts_ht">BTTS 1. Polcas</option>
+      <option value="btts_ht2">BTTS 2. Polcas</option>
+      <option value="btts_home">BTTS Doma</option>
+      <option value="btts_away">BTTS Von</option>
+      <option disabled>&#8212;&#8212;&#8212;&#8212;&#8212;</option>
+      <option value="ou_ft">Over/Under FT (vsetky)</option>
+      <option value="ou_ht">Over/Under 1. Polcas</option>
+      <option value="ou_ht2">Over/Under 2. Polcas</option>
+      <option value="ou_home">Over/Under Doma</option>
+      <option value="ou_away">Over/Under Von</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Filter golov</div>
+    <select id="goalFilter" onchange="renderAll()">
+      <option value="-1">&#8212; Bez filtra &#8212;</option>
+      <option value="0">0 golov</option>
+      <option value="1">1 gol</option>
+      <option value="2">2 goly</option>
+      <option value="3">3 goly</option>
+      <option value="4">4 goly</option>
+      <option value="5">5 golov</option>
+      <option value="6">6+ golov</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Zoradit</div>
+    <select id="sortBy" onchange="renderAll()">
+      <option value="goals_asc">Goly &#8593;</option>
+      <option value="goals_desc">Goly &#8595;</option>
+      <option value="points_desc">Body &#8595;</option>
+      <option value="points_asc">Body &#8593;</option>
+      <option value="played_desc">Zapasy &#8595;</option>
+      <option value="pct_desc">% &#8595;</option>
+      <option value="pct_asc">% &#8593;</option>
+      <option value="streak_desc">Seria &#8595; (najdlhsia)</option>
+      <option value="streak_asc">Seria &#8593; (najkratsia)</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Forma (pocet)</div>
+    <select id="streakCount" onchange="renderAll()">
+      <option value="5">5</option>
+      <option value="6" selected>6</option>
+      <option value="8">8</option>
+      <option value="10">10</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">TOP v lige</div>
+    <div style="display:flex;gap:0.35rem;align-items:center">
+      <select id="topCount" onchange="renderAll()">
+        <option value="0">&#8212; Vyp &#8212;</option>
+        <option value="1">TOP 1</option>
+        <option value="2">TOP 2</option>
+        <option value="3">TOP 3</option>
+      </select>
+      <button id="topBtn" onclick="openTopModal()" title="TOP zo vsetkych lig" style="background:var(--gold);color:#000;border-radius:6px;padding:0.38rem 0.7rem;font-size:0.8rem;font-weight:700;white-space:nowrap">&#127942; TOP lig</button>
+    </div>
+  </div>
+  <div class="filter-info" id="filterInfo">Nacitaj data...</div>
+</div>
+
+<!-- TOP MODAL -->
+<div class="modal-overlay" id="topModalOverlay" onclick="if(event.target===this)closeTopModal()">
+  <div class="modal-box" style="max-width:780px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="topModalTitle">&#127942; TOP zo vsetkych lig</div>
+        <div class="modal-sub" id="topModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeTopModal()">&#10005; Zavriet</button>
+    </div>
+    <div class="modal-body" id="topModalBody"></div>
+  </div>
+</div>
+
+<!-- TABLES -->
+<div class="tables-area">
+  <div id="mainStatus" class="status-line"></div>
+  <div id="tablesGrid" class="tables-grid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&#10005; Zavriet</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════
+// LEAGUES
+// ═══════════════════════════════════════════════
+var PRESETS = [
+  {id:'epl',name:'Anglicko',flag:'\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F'},
+  {id:'bun',name:'Nemecko',flag:'\uD83C\uDDE9\uD83C\uDDEA'},
+  {id:'sa', name:'Taliansko',flag:'\uD83C\uDDEE\uD83C\uDDF9'},
+  {id:'l1', name:'Francuzsko',flag:'\uD83C\uDDEB\uD83C\uDDF7'},
+  {id:'lla',name:'Spanielsko',flag:'\uD83C\uDDEA\uD83C\uDDF8'},
+  {id:'ere',name:'Holandsko',flag:'\uD83C\uDDF3\uD83C\uDDF1'},
+  {id:'jpl',name:'Belgicko',flag:'\uD83C\uDDE7\uD83C\uDDEA'},
+  {id:'cz', name:'Cesko',flag:'\uD83C\uDDE8\uD83C\uDDFF'},
+  {id:'sk', name:'Slovensko',flag:'\uD83C\uDDF8\uD83C\uDDF0'}
+];
+
+var leagues = {};
+var activeId = null;
+var teams = [];
+var matches = [];
+var qeHist = [];
+
+function initLeagues() {
+  for (var i=0;i<PRESETS.length;i++) {
+    var p=PRESETS[i];
+    if (!leagues[p.id]) leagues[p.id]={id:p.id,name:p.name,flag:p.flag,teams:[],matches:[]};
+  }
+}
+
+function switchLeague(id) {
+  if (activeId) saveCurrentToLeague();
+  activeId = id;
+  var lg = leagues[id];
+  teams = lg.teams.slice();
+  matches = lg.matches.slice();
+  document.getElementById('teamsBox').value = teams.join('\n');
+  document.getElementById('resultsBox').value = matchesToText(matches);
+  setStatus('teamsStatus', teams.length ? '&#10004; '+teams.length+' timov' : '', teams.length?'ok':'');
+  setStatus('resultsStatus', matches.length ? '&#10004; '+matches.length+' zapasov' : '', matches.length?'ok':'');
+  qeHist = [];
+  renderQEHistory();
+  populateTeamSelects();
+  renderLeagueTabs();
+  renderAll();
+}
+
+function saveCurrentToLeague() {
+  if (!activeId||!leagues[activeId]) return;
+  leagues[activeId].teams = teams.slice();
+  leagues[activeId].matches = matches.slice();
+}
+
+function matchesToText(arr) {
+  var out=[];
+  for (var i=0;i<arr.length;i++) {
+    var m=arr[i];
+    out.push(m.home+' - '+m.away+' '+m.ht1+':'+m.ht2+' '+m.ft1+':'+m.ft2);
+  }
+  return out.join('\n');
+}
+
+function addLeague() {
+  var name=prompt('Nazov novej ligy:','Nova liga');
+  if (!name||!name.trim()) return;
+  var flag=prompt('Vlajka (emoji):','\uD83C\uDFC6');
+  var id='lg_'+Date.now();
+  leagues[id]={id:id,name:name.trim(),flag:flag||'\uD83C\uDFC6',teams:[],matches:[]};
+  saveAllLeagues();
+  switchLeague(id);
+}
+
+function deleteLeague() {
+  if (!activeId) return;
+  var ids=Object.keys(leagues);
+  if (ids.length<=1){alert('Musi zostat aspon jedna liga.');return;}
+  if (!confirm('Zmazat ligu "'+leagues[activeId].name+'"?')) return;
+  delete leagues[activeId];
+  activeId=null;
+  switchLeague(Object.keys(leagues)[0]);
+  saveAllLeagues();
+}
+
+function saveAllLeagues() {
+  saveCurrentToLeague();
+  try{localStorage.setItem('fsapp_leagues',JSON.stringify(leagues));}catch(e){}
+  try{localStorage.setItem('fsapp_active',activeId);}catch(e){}
+}
+
+function saveLeagueData() {
+  saveAllLeagues();
+  setStatus('teamsStatus','&#128190; Ulozene','ok');
+  setStatus('resultsStatus','&#128190; Ulozene','ok');
+}
+
+function loadLeagueData() {
+  var saved=null;
+  try{saved=localStorage.getItem('fsapp_leagues');}catch(e){}
+  if (saved) {
+    try{var p=JSON.parse(saved);for(var id in p)leagues[id]=p[id];}catch(e){}
+  }
+  var act=null;
+  try{act=localStorage.getItem('fsapp_active');}catch(e){}
+  var target=(act&&leagues[act])?act:Object.keys(leagues)[0];
+  activeId=null;
+  switchLeague(target);
+  setStatus('teamsStatus','&#128194; Nacitane','ok');
+}
+
+function renderLeagueTabs() {
+  var c=document.getElementById('leagueTabs'), html='';
+  var ids=Object.keys(leagues);
+  for (var i=0;i<ids.length;i++) {
+    var id=ids[i],lg=leagues[id],isAct=id===activeId;
+    var cnt=isAct?matches.length:lg.matches.length;
+    html+='<button class="ltab'+(isAct?' active':'')+'" onclick="switchLeague(\''+id+'\')">'+
+      lg.flag+' '+lg.name+
+      (cnt>0?'<span class="ltab-cnt">'+cnt+'</span>':'')+
+      '</button>';
+  }
+  c.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function setStatus(id,msg,type){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=msg;
+  el.className='status-line '+(type||'ok');
+}
+function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+function shortN(n){return n.length>16?n.substring(0,15)+'...':n}
+function pct(n,d){return d===0?0:Math.round(n/d*100)}
+function renderPct(val,total){
+  var p=pct(val,total);
+  var cls=p>=60?'pct-high':p>=35?'pct-mid':'pct-low';
+  var col=p>=60?'var(--green)':p>=35?'var(--gold)':'var(--red)';
+  return '<div class="pct-bar-wrap"><span class="pct-val '+cls+'">'+p+'%</span>'+
+    '<div class="pct-bar"><div class="pct-bar-fill" style="width:'+p+'%;background:'+col+'"></div></div></div>';
+}
+function togglePanel(k){
+  var b=document.getElementById(k+'Body'),t=document.getElementById(k+'Toggle');
+  var open=b.classList.toggle('open');
+  t.innerHTML=open?'&#9650;':'&#9660;';
+  if(k==='voice'&&open) voiceCheckPermission();
+}
+function toggleTheme(){
+  var next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').innerHTML=next==='dark'?'&#127769; Nocny':'&#9728;&#65039; Denny';
+  try{localStorage.setItem('fsapp_theme',next);}catch(e){}
+}
+function applyTheme(){
+  var s='dark';try{s=localStorage.getItem('fsapp_theme')||'dark';}catch(e){}
+  document.documentElement.setAttribute('data-theme',s);
+  document.getElementById('themeBtn').innerHTML=s==='dark'?'&#127769; Nocny':'&#9728;&#65039; Denny';
+}
+
+// ═══════════════════════════════════════════════
+// TEAMS
+// ═══════════════════════════════════════════════
+function parseTeams(){
+  var raw=document.getElementById('teamsBox').value.trim();
+  if(!raw){setStatus('teamsStatus','Prazdny vstup!','err');return;}
+  teams=raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+  if(activeId)leagues[activeId].teams=teams.slice();
+  saveAllLeagues();
+  setStatus('teamsStatus','&#10004; Nacitanych '+teams.length+' timov','ok');
+  populateTeamSelects();renderLeagueTabs();renderAll();
+}
+function clearTeams(){
+  document.getElementById('teamsBox').value='';teams=[];
+  if(activeId)leagues[activeId].teams=[];
+  setStatus('teamsStatus','Vymazane','err');renderAll();
+}
+
+// ═══════════════════════════════════════════════
+// PARSER
+// ═══════════════════════════════════════════════
+function parseSingleLine(line){
+  var s=line.trim();
+  var m1=s.match(/^(.+?)\s+-\s+(.+?)\s+(\d+):(\d+)\s+(\d+):(\d+)\s*$/);
+  if(m1){var h=m1[1].trim(),a=m1[2].trim(),ht1=+m1[3],ht2=+m1[4],ft1=+m1[5],ft2=+m1[6];
+    return{home:h,away:a,ht1:ht1,ht2:ht2,ft1:ft1,ft2:ft2,ht2_1:ft1-ht1,ht2_2:ft2-ht2,fmt:1};}
+  var m2=s.match(/^(.+?)\s+-\s+(.+?)\s+(\d+):(\d+)\s+\((\d+):(\d+)\)\s*$/);
+  if(m2){var h=m2[1].trim(),a=m2[2].trim(),ft1=+m2[3],ft2=+m2[4],ht1=+m2[5],ht2=+m2[6];
+    return{home:h,away:a,ht1:ht1,ht2:ht2,ft1:ft1,ft2:ft2,ht2_1:ft1-ht1,ht2_2:ft2-ht2,fmt:2};}
+  var m3=s.match(/^(.+?)\s+-\s+(.+?)\s+(\d+):(\d+)\s*$/);
+  if(m3){var h=m3[1].trim(),a=m3[2].trim(),ht1=+m3[3],ht2=+m3[4];
+    return{home:h,away:a,ht1:ht1,ht2:ht2,ft1:ht1,ft2:ht2,ht2_1:0,ht2_2:0,fmt:3};}
+  return null;
+}
+function parseLines(lines){
+  var res=[],err=[],fc={1:0,2:0,3:0};
+  for(var i=0;i<lines.length;i++){
+    var p=parseSingleLine(lines[i]);
+    if(!p){if(lines[i].trim())err.push(lines[i].substring(0,45));}
+    else{fc[p.fmt]++;res.push(p);}
+  }
+  return{results:res,errors:err,fmtCount:fc};
+}
+function parseResults(){
+  var raw=document.getElementById('resultsBox').value.trim();
+  if(!raw){setStatus('resultsStatus','Prazdny vstup!','err');return;}
+  var p=parseLines(raw.split('\n'));
+  matches=p.results;
+  if(activeId)leagues[activeId].matches=matches.slice();
+  saveAllLeagues();
+  showParseStatus('resultsStatus',matches.length,p.errors,p.fmtCount);
+  populateTeamSelects();renderLeagueTabs();renderAll();
+}
+function appendResults(){
+  var raw=document.getElementById('appendBox').value.trim();
+  if(!raw){setStatus('appendStatus','Prazdny vstup!','err');return;}
+  var p=parseLines(raw.split('\n'));
+  if(!p.results.length){setStatus('appendStatus','Ziadne platne riadky','err');return;}
+  var added=0;
+  for(var i=0;i<p.results.length;i++){
+    var r=p.results[i],dup=false;
+    for(var j=0;j<matches.length;j++){
+      var m=matches[j];
+      if(m.home===r.home&&m.away===r.away&&m.ft1===r.ft1&&m.ft2===r.ft2&&m.ht1===r.ht1&&m.ht2===r.ht2){dup=true;break;}
+    }
+    if(!dup){matches.push(r);added++;}
+  }
+  var tb=document.getElementById('resultsBox');
+  var nl=raw.split('\n').filter(function(l){return l.trim();}).join('\n');
+  tb.value=(tb.value.trim()?tb.value.trim()+'\n':'')+nl;
+  if(activeId)leagues[activeId].matches=matches.slice();
+  saveAllLeagues();
+  var sk=p.results.length-added;
+  var msg='+ Pridanych '+added+' zapasov'+(sk?' ('+sk+' duplikatov)':'')+(p.errors.length?' '+p.errors.length+' chyb':'');
+  setStatus('appendStatus',msg,p.errors.length?'warn':'ok');
+  setStatus('resultsStatus','Celkom '+matches.length+' zapasov','ok');
+  document.getElementById('appendBox').value='';
+  renderLeagueTabs();renderAll();
+}
+function showParseStatus(id,count,errors,fc){
+  var msg='&#10004; Nacitanych '+count+' zapasov';
+  var parts=[];
+  if(fc[1])parts.push(fc[1]+'x(1)');
+  if(fc[2])parts.push(fc[2]+'x(2)');
+  if(fc[3])parts.push(fc[3]+'x(3)');
+  if(parts.length)msg+=' ('+parts.join(' ')+')';
+  if(errors.length)msg+=' &#9888; '+errors.length+' chyb';
+  var el=document.getElementById(id);
+  el.innerHTML=msg;el.className='status-line '+(errors.length?'warn':'ok');
+  if(errors.length)el.title='Necitatelne:\n'+errors.join('\n');else el.removeAttribute('title');
+}
+function clearResults(){
+  document.getElementById('resultsBox').value='';matches=[];
+  if(activeId)leagues[activeId].matches=[];
+  setStatus('resultsStatus','Vymazane','err');renderLeagueTabs();renderAll();
+}
+
+// ═══════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════
+function getTeamsList(){
+  if(teams.length>0)return teams.slice();
+  var s={};for(var i=0;i<matches.length;i++){s[matches[i].home]=1;s[matches[i].away]=1;}
+  return Object.keys(s).sort();
+}
+
+var TABLE_DEFS=[
+  {key:'overall', label:'Celkova tabulka', badge:'FT',    ghFn:function(m){return m.ft1;}, gaFn:function(m){return m.ft2;}, role:'both'},
+  {key:'home',    label:'Doma',            badge:'FT D',  ghFn:function(m){return m.ft1;}, gaFn:function(m){return m.ft2;}, role:'home'},
+  {key:'away',    label:'Von',             badge:'FT V',  ghFn:function(m){return m.ft2;}, gaFn:function(m){return m.ft1;}, role:'away'},
+  {key:'ht',      label:'1. Polcas',       badge:'HT',    ghFn:function(m){return m.ht1;}, gaFn:function(m){return m.ht2;}, role:'both'},
+  {key:'ht2',     label:'2. Polcas',       badge:'HT2',   ghFn:function(m){return m.ht2_1;},gaFn:function(m){return m.ht2_2;},role:'both'},
+  {key:'ht_home', label:'1. Polcas Doma',  badge:'HT D',  ghFn:function(m){return m.ht1;}, gaFn:function(m){return m.ht2;}, role:'home'},
+  {key:'ht_away', label:'1. Polcas Von',   badge:'HT V',  ghFn:function(m){return m.ht2;}, gaFn:function(m){return m.ht1;}, role:'away'},
+  {key:'ht2_home',label:'2. Polcas Doma',  badge:'HT2 D', ghFn:function(m){return m.ht2_1;},gaFn:function(m){return m.ht2_2;},role:'home'},
+  {key:'ht2_away',label:'2. Polcas Von',   badge:'HT2 V', ghFn:function(m){return m.ht2_2;},gaFn:function(m){return m.ht2_1;},role:'away'}
+];
+
+// Over/Under table definitions (separate from TABLE_DEFS, use own renderer)
+var OU_LINES=[0.5,1.5,2.5,3.5];
+var OU_CONTEXTS=[
+  {key:'ou_ft',   label:'Over/Under FT',    total:function(m){return m.ft1+m.ft2;},   role:'both'},
+  {key:'ou_ht',   label:'Over/Under 1.P',   total:function(m){return m.ht1+m.ht2;},   role:'both'},
+  {key:'ou_ht2',  label:'Over/Under 2.P',   total:function(m){return m.ht2_1+m.ht2_2;},role:'both'},
+  {key:'ou_home', label:'Over/Under Doma',  total:function(m){return m.ft1+m.ft2;},   role:'home'},
+  {key:'ou_away', label:'Over/Under Von',   total:function(m){return m.ft1+m.ft2;},   role:'away'}
+];
+
+function buildTableForDef(def,goalFilter){
+  var tl=getTeamsList(),stats={};
+  for(var i=0;i<tl.length;i++)stats[tl[i]]={name:tl[i],played:0,wins:0,draws:0,losses:0,gf:0,ga:0,points:0};
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],gh=def.ghFn(m),ga=def.gaFn(m);
+    // gh = home team's goals in this context (or tracked team for away defs)
+    // ga = away team's goals in this context (or opponent for away defs)
+    if(def.role==='both'||def.role==='home'){
+      // home side: gh = home goals, ga = away goals
+      var ok=goalFilter<0?true:(goalFilter===6?gh>=6:gh===goalFilter);
+      if(ok&&stats[m.home]){var s=stats[m.home];s.played++;s.gf+=gh;s.ga+=ga;
+        if(gh>ga){s.wins++;s.points+=3;}else if(gh===ga){s.draws++;s.points++;}else s.losses++;}
+    }
+    if(def.role==='both'||def.role==='away'){
+      // away side: for away defs, ghFn=away goals, gaFn=home goals
+      // so gh here = away team's goals, ga = home team's goals
+      var teamG = (def.role==='away') ? gh : ga;   // away team goals
+      var oppG  = (def.role==='away') ? ga : gh;   // opponent goals
+      var ok2=goalFilter<0?true:(goalFilter===6?teamG>=6:teamG===goalFilter);
+      if(ok2&&stats[m.away]){var s2=stats[m.away];s2.played++;s2.gf+=teamG;s2.ga+=oppG;
+        if(teamG>oppG){s2.wins++;s2.points+=3;}else if(teamG===oppG){s2.draws++;s2.points++;}else s2.losses++;}
+    }
+  }
+  var rows=[];for(var k in stats)rows.push(stats[k]);
+  if(goalFilter>=0)rows=rows.filter(function(r){return r.played>0;});
+  return rows;
+}
+function buildHtCompTable(role){
+  var tl=getTeamsList(),stats={};
+  for(var i=0;i<tl.length;i++)stats[tl[i]]={name:tl[i],played:0,ht1more:0,ht2more:0,equal:0};
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i];
+    var chk=function(team,h1,h2){if(!stats[team])return;stats[team].played++;
+      if(h1>h2)stats[team].ht1more++;else if(h2>h1)stats[team].ht2more++;else stats[team].equal++;};
+    if(role==='both'||role==='home')chk(m.home,m.ht1,m.ht2_1);
+    if(role==='both'||role==='away')chk(m.away,m.ht2,m.ht2_2);
+  }
+  var rows=[];for(var k in stats){if(stats[k].played>0)rows.push(stats[k]);}return rows;
+}
+function buildBttsTable(gf1,gf2,role){
+  var tl=getTeamsList(),stats={};
+  for(var i=0;i<tl.length;i++)stats[tl[i]]={name:tl[i],played:0,bttsYes:0,bttsNo:0};
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],g1=gf1(m),g2=gf2(m),isBtts=g1>=1&&g2>=1;
+    var pr=function(team){if(!stats[team])return;stats[team].played++;
+      if(isBtts)stats[team].bttsYes++;else stats[team].bttsNo++;};
+    if(role==='both'||role==='home')pr(m.home);
+    if(role==='both'||role==='away')pr(m.away);
+  }
+  var rows=[];for(var k in stats){if(stats[k].played>0)rows.push(stats[k]);}return rows;
+}
+
+// ═══════════════════════════════════════════════
+// STREAKS
+// ═══════════════════════════════════════════════
+function getTeamStreaks(name,def,goalFilter,maxDots){
+  var arr=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===name,isA=m.away===name;
+    if(!isH&&!isA)continue;
+    if(def.role==='home'&&!isH)continue;
+    if(def.role==='away'&&!isA)continue;
+    // tg = team's goals in this context, og = opponent's goals
+    // For W/D/L we always use full-time absolute scores
+    // For goal filter we use the def's scoring function FROM THE TEAM'S PERSPECTIVE
+    var gh=def.ghFn(m), ga_v=def.gaFn(m);
+    // team's score in def context: home team uses gh, away team uses ga_v
+    var tg = isH ? gh : ga_v;
+    var og = isH ? ga_v : gh;
+    if(goalFilter<0){
+      // W/D/L: use full-time result regardless of def
+      var ftTeam = isH ? m.ft1 : m.ft2;
+      var ftOpp  = isH ? m.ft2 : m.ft1;
+      arr.push(ftTeam>ftOpp?'w':ftTeam===ftOpp?'d':'l');
+    } else {
+      arr.push(goalFilter===6?tg>=6:tg===goalFilter);
+    }
+  }
+  return arr.slice(-maxDots);
+}
+function getHtCompStreaks(name,role,maxDots){
+  var arr=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===name,isA=m.away===name;
+    if(!isH&&!isA)continue;
+    if(role==='home'&&!isH)continue;
+    if(role==='away'&&!isA)continue;
+    var ht=isH?m.ht1:m.ht2,ht2v=isH?m.ht2_1:m.ht2_2;
+    arr.push(ht>ht2v?'ht1':ht2v>ht?'ht2':'eq');
+  }
+  return arr.slice(-maxDots);
+}
+function getBttsStreaks(name,gf1,gf2,role,maxDots){
+  var arr=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===name,isA=m.away===name;
+    if(!isH&&!isA)continue;
+    if(role==='home'&&!isH)continue;
+    if(role==='away'&&!isA)continue;
+    arr.push(gf1(m)>=1&&gf2(m)>=1);
+  }
+  return arr.slice(-maxDots);
+}
+function renderDots(arr,type){
+  var out='';
+  for(var i=0;i<arr.length;i++){
+    var v=arr[i];
+    if(type==='bool'){
+      // v can be true/false (with filter) or 'w'/'d'/'l' (without filter)
+      if(v==='w') out+='<span class="dot dot-yes" title="Vyhra"></span>';
+      else if(v==='d') out+='<span class="dot dot-draw" title="Remia"></span>';
+      else if(v==='l') out+='<span class="dot dot-loss" title="Prehra"></span>';
+      else out+='<span class="dot '+(v?'dot-yes':'dot-no')+'" title="'+(v?'Splnil':'Nesplnil')+'"></span>';
+    }
+    else if(type==='comp'){
+      if(v==='ht1')out+='<span class="dot dot-ht1" title="Viac v 1.P"></span>';
+      else if(v==='ht2')out+='<span class="dot dot-ht2" title="Viac v 2.P"></span>';
+      else out+='<span class="dot dot-eq" title="Rovnako"></span>';
+    }else if(type==='btts')
+      out+='<span class="dot '+(v?'dot-btts-yes':'dot-btts-no')+'" title="'+(v?'Oba':'Nie')+'"></span>';
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════
+// MODAL — match rows with HT / 2P / FT breakdown
+// ═══════════════════════════════════════════════
+function rcls(tf,ta){
+  if(tf>ta)return{rc:'res-w',wdl:'V',wc:'m-w',scFt:'ft'};
+  if(tf<ta)return{rc:'res-l',wdl:'P',wc:'m-l',scFt:'ft sc-l'};
+  return{rc:'res-d',wdl:'R',wc:'m-d',scFt:'ft sc-d'};
+}
+
+function buildMatchRow(m,isHome,met,showCheck){
+  // ALL scores: tracked Team : Opponent  (Team is always LEFT)
+  var tf  = isHome?m.ft1:m.ft2;
+  var ta  = isHome?m.ft2:m.ft1;
+  var htH = isHome?m.ht1:m.ht2;
+  var htA = isHome?m.ht2:m.ht1;
+  var h2H = isHome?m.ht2_1:m.ht2_2;
+  var h2A = isHome?m.ht2_2:m.ht2_1;
+
+  var r=rcls(tf,ta);
+  var opacity=(met===false)?' style="opacity:0.35"':'';
+  var checkHtml=showCheck?
+    '<div class="mm-check" style="color:'+(met?'var(--green)':'var(--muted)')+'">'+
+      (met?'&#10004;':'&#8211;')+'</div>':
+    '<div></div>';
+
+  // Header: TEAM (tracked, always left) vs OPPONENT (always right)
+  var teamName  = isHome ? m.home : m.away;
+  var oppoName  = isHome ? m.away : m.home;
+  var roleBadge = '<span style="font-size:0.6rem;opacity:0.6;margin-left:0.2rem">'+(isHome?'(D)':'(H)')+'</span>';
+  var scColor   = r.rc==='res-w'?'var(--green)':r.rc==='res-l'?'var(--red)':'#f0b040';
+
+  return '<div class="mm-row '+r.rc+'"'+opacity+'>' +
+    '<div class="mm-top">' +
+      '<div class="mm-home mm-team-hl">'+teamName+roleBadge+'</div>' +
+      '<div style="text-align:center">'+
+        '<div style="font-family:Oswald,sans-serif;font-size:1.05rem;padding:0.1rem 0.45rem;'+
+        'border-radius:5px;background:var(--card);border:1px solid var(--border);'+
+        'color:'+scColor+';white-space:nowrap">'+tf+':'+ta+'</div>'+
+        '<div style="font-size:0.58rem;color:var(--muted);text-align:center;margin-top:0.08rem">Tim : Soper</div>'+
+      '</div>' +
+      '<div class="mm-away">'+oppoName+'</div>' +
+      checkHtml +
+    '</div>' +
+    '<div class="mm-scores">' +
+      '<div class="mm-sbox"><div class="mm-slabel">1. Polcas</div>' +
+        '<div class="mm-sval ht">'+htH+':'+htA+'</div></div>' +
+      '<div class="mm-sbox"><div class="mm-slabel">2. Polcas</div>' +
+        '<div class="mm-sval ht2">'+h2H+':'+h2A+'</div></div>' +
+      '<div class="mm-sbox"><div class="mm-slabel">Konecny</div>' +
+        '<div class="mm-sval '+r.scFt+'">'+tf+':'+ta+'</div></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function openTeamModal(teamName,defKey,goalFilter){
+  var def=null;
+  for(var i=0;i<TABLE_DEFS.length;i++){if(TABLE_DEFS[i].key===defKey){def=TABLE_DEFS[i];break;}}
+  if(!def)return;
+  var gfLabel=goalFilter<0?'vsetky':(goalFilter===6?'6+':goalFilter)+' golov';
+  document.getElementById('modalTitle').textContent=teamName;
+  document.getElementById('modalSub').textContent=def.label+' · Filter: '+gfLabel;
+
+  var relevant=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===teamName,isA=m.away===teamName;
+    if(!isH&&!isA)continue;
+    if(def.role==='home'&&!isH)continue;
+    if(def.role==='away'&&!isA)continue;
+    var gh=def.ghFn(m),ga=def.gaFn(m),tg=isH?gh:ga;
+    var met=goalFilter<0?true:(goalFilter===6?tg>=6:tg===goalFilter);
+    relevant.push({m:m,isHome:isH,met:met});
+  }
+
+  // Reverse so newest match is at top
+  relevant.reverse();
+
+  var maxDots=parseInt(document.getElementById('streakCount').value)||6;
+  // For streaks in modal header: take last N matches (oldest→newest = left→right)
+  var sArr=getTeamStreaks(teamName,def,goalFilter,maxDots);
+  var sCount=sArr.filter(function(v){return v==='w'||v===true;}).length;
+  var sHtml='<div class="modal-streak-row"><span class="modal-streak-label">Forma:</span>' +
+    '<div class="streaks">'+renderDots(sArr,'bool')+'</div>' +
+    '<span style="font-size:0.68rem;color:var(--muted);margin-left:0.5rem">V '+sCount+'/'+sArr.length+'</span></div>';
+
+  var legend='<div class="modal-legend">'+
+    '<span class="ml-item"><span class="ml-swatch" style="background:rgba(240,192,64,0.15);border-color:rgba(240,192,64,0.4)"></span>1. Polcas (HT)</span>'+
+    '<span class="ml-item"><span class="ml-swatch" style="background:rgba(255,153,51,0.15);border-color:rgba(255,153,51,0.4)"></span>2. Polcas</span>'+
+    '<span class="ml-item"><span class="ml-swatch" style="background:rgba(61,220,132,0.15);border-color:rgba(61,220,132,0.4)"></span>Konecny (FT)</span>'+
+    '</div>';
+
+  var rows='';
+  for(var i=0;i<relevant.length;i++){
+    rows+=buildMatchRow(relevant[i].m,relevant[i].isHome,relevant[i].met,true);
+  }
+  document.getElementById('modalBody').innerHTML=sHtml+legend+(rows||'<div class="no-data">Ziadne zapasy</div>');
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function openHtCompModal(teamName,role){
+  document.getElementById('modalTitle').textContent=teamName;
+  document.getElementById('modalSub').textContent='Porovnanie: 1.P vs 2.P';
+  var maxDots=parseInt(document.getElementById('streakCount').value)||6;
+  var sArr=getHtCompStreaks(teamName,role,maxDots);
+  var sHtml='<div class="modal-streak-row"><span class="modal-streak-label">Posledne:</span>' +
+    '<div class="streaks">'+renderDots(sArr,'comp')+'</div></div>';
+  var legend='<div class="modal-legend">'+
+    '<span class="ml-item"><span class="dot dot-ht1" style="display:inline-block;width:10px;height:10px"></span>Viac 1.P</span>'+
+    '<span class="ml-item"><span class="dot dot-ht2" style="display:inline-block;width:10px;height:10px"></span>Viac 2.P</span>'+
+    '<span class="ml-item"><span class="dot dot-eq" style="display:inline-block;width:10px;height:10px"></span>Rovnako</span>'+
+    '</div>';
+  var rows='';
+  var modalMatches=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===teamName,isA=m.away===teamName;
+    if(!isH&&!isA)continue;
+    if(role==='home'&&!isH)continue;
+    if(role==='away'&&!isA)continue;
+    modalMatches.push({m:m,isH:isH});
+  }
+  modalMatches.reverse();
+  for(var i=0;i<modalMatches.length;i++){
+    rows+=buildMatchRow(modalMatches[i].m,modalMatches[i].isH,undefined,false);
+  }
+  document.getElementById('modalBody').innerHTML=sHtml+legend+rows;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function openBttsModal(teamName,label,role){
+  var gf1,gf2;
+  if(label.indexOf('1. Polcas')>=0||label.indexOf('Polcas (HT)')>=0){gf1=function(m){return m.ht1;};gf2=function(m){return m.ht2;};}
+  else if(label.indexOf('2. Polcas')>=0){gf1=function(m){return m.ht2_1;};gf2=function(m){return m.ht2_2;};}
+  else if(label.indexOf('Doma')>=0){gf1=function(m){return m.ft1;};gf2=function(m){return m.ft2;};}
+  else if(label.indexOf('Von')>=0){gf1=function(m){return m.ft2;};gf2=function(m){return m.ft1;};}
+  else{gf1=function(m){return m.ft1;};gf2=function(m){return m.ft2;};}
+
+  document.getElementById('modalTitle').textContent=teamName;
+  document.getElementById('modalSub').textContent='BTTS · '+label;
+  var maxDots=parseInt(document.getElementById('streakCount').value)||6;
+  var sArr=getBttsStreaks(teamName,gf1,gf2,role,maxDots);
+  var yes=sArr.filter(function(v){return v;}).length;
+  var sHtml='<div class="modal-streak-row"><span class="modal-streak-label">BTTS forma:</span>' +
+    '<div class="streaks">'+renderDots(sArr,'btts')+'</div>' +
+    '<span style="font-size:0.68rem;color:var(--muted);margin-left:0.5rem">&#10004; '+yes+'/'+sArr.length+
+    ' ('+pct(yes,sArr.length)+'%)</span></div>';
+  var ctx='<div class="modal-context">BTTS · '+label+'</div>';
+  var rows='';
+  var bttsMatches=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===teamName,isA=m.away===teamName;
+    if(!isH&&!isA)continue;
+    if(role==='home'&&!isH)continue;
+    if(role==='away'&&!isA)continue;
+    var isBtts=gf1(m)>=1&&gf2(m)>=1;
+    bttsMatches.push({m:m,isH:isH,isBtts:isBtts});
+  }
+  bttsMatches.reverse();
+  for(var i=0;i<bttsMatches.length;i++){
+    rows+=buildMatchRow(bttsMatches[i].m,bttsMatches[i].isH,bttsMatches[i].isBtts,true);
+  }
+  document.getElementById('modalBody').innerHTML=sHtml+ctx+(rows||'<div class="no-data">Ziadne zapasy</div>');
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function getStreakVal(name, def, goalFilter) {
+  // Returns signed streak value: positive=winning, negative=losing, 0=draw
+  // Used for sorting
+  var s = getCurrentStreak(name, def, goalFilter);
+  if (!s.count) return 0;
+  if (s.type==='w'||s.type==='yes') return s.count;
+  if (s.type==='l'||s.type==='no') return -s.count;
+  return 0; // draw streaks sort as 0
+}
+
+function sortRows(rows, sortBy, def, goalFilter) {
+  var sb = sortBy;
+  return rows.sort(function(a,b){
+    if(sb==='goals_asc') return a.gf-b.gf||a.name.localeCompare(b.name);
+    if(sb==='goals_desc') return b.gf-a.gf||a.name.localeCompare(b.name);
+    if(sb==='points_desc') return b.points-a.points||b.gf-a.gf;
+    if(sb==='points_asc') return a.points-b.points||a.gf-b.gf;
+    if(sb==='played_desc') return b.played-a.played||b.points-a.points;
+    if(sb==='pct_desc') return (b.pct||0)-(a.pct||0);
+    if(sb==='pct_asc') return (a.pct||0)-(b.pct||0);
+    if((sb==='streak_desc'||sb==='streak_asc') && def) {
+      var sa=getStreakVal(a.name,def,goalFilter<0?-1:goalFilter);
+      var sb2=getStreakVal(b.name,def,goalFilter<0?-1:goalFilter);
+      // streak_desc: longest winning streak first, then longest losing last
+      // We sort by absolute value desc, with wins before losses
+      var absDiff = Math.abs(sb2)-Math.abs(sa);
+      if(absDiff!==0) return sortBy==='streak_desc'?absDiff:-absDiff;
+      return b.points-a.points;
+    }
+    return b.points-a.points||b.gf-a.gf;
+  });
+}
+
+function renderStreakBadge(streak) {
+  if (!streak.count) return '<span style="color:var(--muted);font-size:0.7rem">&#8212;</span>';
+  var col, bg, sym;
+  if (streak.type==='w'||streak.type==='yes') {
+    col='var(--green)'; bg='rgba(61,220,132,0.12)'; sym='&#9650;';
+  } else if (streak.type==='l'||streak.type==='no') {
+    col='var(--red)'; bg='rgba(255,85,85,0.12)'; sym='&#9660;';
+  } else { // draw
+    col='#f0b040'; bg='rgba(240,176,64,0.1)'; sym='&#9644;';
+  }
+  var label = streak.type==='w'?'V':streak.type==='l'?'P':streak.type==='d'?'R':(streak.type==='yes'?'&#10004;':'&#10007;');
+  return '<span style="font-family:Oswald,sans-serif;font-size:0.82rem;color:'+col+';'+
+    'background:'+bg+';border-radius:4px;padding:0.05rem 0.35rem;white-space:nowrap" title="Aktualna seria">'+
+    label+streak.count+'</span>';
+}
+
+function renderStandardTable(def,goalFilter,sortBy,maxDots,topCount){
+  var rows=buildTableForDef(def,goalFilter);
+  sortRows(rows,sortBy,def,goalFilter);
+  var gStr=goalFilter>=0?(goalFilter===6?'6+':goalFilter)+'G':'';
+  var badgeText=gStr?def.badge+' '+gStr:def.badge;
+  var headLabel=def.label+(gStr?' <span style="color:var(--gold);font-size:0.7em">'+gStr+'</span>':'');
+  var tc = topCount || 0;
+
+  var html='<div class="tbl-card">'+
+    '<div class="tbl-head"><span class="tbl-head-label" title="'+def.label+(gStr?' filter:'+gStr:'')+'">'+headLabel+'</span>'+
+    '<span class="badge">'+badgeText+'</span></div>'+
+    '<div class="tbl-scroll">'+
+    '<table><thead><tr>'+
+    '<th class="left" style="width:22px" title="Poradie">#</th>'+
+    '<th class="left col-team" title="Nazov timu">Tim</th>'+
+    '<th title="Pocet odohratych zapasov">Z</th>'+
+    '<th class="w" title="Vyhry">V</th>'+
+    '<th class="d" title="Remisy">R</th>'+
+    '<th class="l" title="Prehry">P</th>'+
+    '<th title="Goly strelene (Goals For)">GF</th>'+
+    '<th title="Goly inkasovane (Goals Against)" style="color:var(--muted)">GA</th>'+
+    '<th title="Skore = GF minus GA">GD</th>'+
+    '<th title="Body (3 za vyhra, 1 za remia)">B</th>'+
+    '<th title="Percento zapasov kde bol splneny filter golov" style="text-align:right">%</th>'+
+    '<th title="Aktualna neprerushena seria (zelena=splna, cervena=nesplna)" style="text-align:center">Seria</th>'+
+    '<th title="Poslednych N zapasov, zlava=najstarsi, vpravo=najnovsi" style="text-align:right;padding-right:0.45rem">Forma</th>'+
+    '</tr></thead><tbody>';
+
+  if(!rows.length){html+='<tr><td colspan="13" class="no-data">Ziadne data</td></tr>';}
+  else{
+    var allRows=buildTableForDef(def,-1);
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i];
+      var streaks=getTeamStreaks(r.name,def,goalFilter,maxDots);
+      var streak=getCurrentStreak(r.name,def,goalFilter);
+      var totalRec=null;
+      for(var j=0;j<allRows.length;j++){if(allRows[j].name===r.name){totalRec=allRows[j];break;}}
+      var totalPlayed=totalRec?totalRec.played:r.played;
+      var pctHtml=(goalFilter>=0&&totalPlayed>0)?renderPct(r.played,totalPlayed):'<span style="color:var(--muted);font-size:0.7rem">&#8212;</span>';
+      var gd=r.gf-r.ga;
+      var gdHtml='<span style="color:'+(gd>0?'var(--green)':gd<0?'var(--red)':'var(--muted)')+'">'+
+        (gd>0?'+':'')+gd+'</span>';
+      var isTop = tc>0 && i<tc;
+      var rowStyle = isTop ? 'background:rgba(240,192,64,0.06);border-left:2px solid var(--gold)' : '';
+      var rankDisp = isTop
+        ? '<span style="color:var(--gold);font-weight:700">'+(i+1)+'</span>'
+        : '<span class="rank-num">'+(i+1)+'</span>';
+      html+='<tr class="clickable-team" style="'+rowStyle+'" onclick="openTeamModal(\''+esc(r.name)+'\',\''+def.key+'\','+goalFilter+')">'+
+        '<td style="padding-left:'+(isTop?'0.2rem':'0.48rem')+'">'+ rankDisp +'</td>'+
+        '<td class="left col-team"><span class="team-name-text" title="'+r.name+'">'+shortN(r.name)+'</span></td>'+
+        '<td>'+r.played+'</td><td class="w">'+r.wins+'</td><td class="d">'+r.draws+'</td>'+
+        '<td class="l">'+r.losses+'</td>'+
+        '<td><span class="goals-num">'+r.gf+'</span></td>'+
+        '<td style="color:var(--muted)">'+r.ga+'</td>'+
+        '<td>'+gdHtml+'</td>'+
+        '<td><span class="pts">'+r.points+'</span></td>'+
+        '<td style="text-align:right">'+pctHtml+'</td>'+
+        '<td style="text-align:center">'+renderStreakBadge(streak)+'</td>'+
+        '<td style="padding-right:0.45rem"><div class="streaks">'+renderDots(streaks,'bool')+'</div></td></tr>';
+    }
+  }
+  return html+'</tbody></table></div></div>';
+}
+
+function renderHtCompCard(roleLabel,role){
+  var maxDots=parseInt(document.getElementById('streakCount').value)||6;
+  var rows=buildHtCompTable(role);
+  rows.sort(function(a,b){return b.ht1more-a.ht1more||a.name.localeCompare(b.name);});
+  var html='<div class="tbl-card">'+
+    '<div class="tbl-head"><span class="tbl-head-label">HT1 vs HT2 '+roleLabel+'</span>'+
+    '<span class="badge badge-ht1">HT1&gt;HT2</span></div>'+
+    '<div class="tbl-scroll">'+
+    '<table><thead><tr><th class="left" style="width:18px" title="Poradie">#</th>'+
+    '<th class="left col-team" title="Nazov timu">Tim</th>'+
+    '<th title="Zapasy">Z</th><th style="color:var(--gold)" title="Zapasy kde 1.Polcas mal viac golov">1.P&#8593;</th>'+
+    '<th style="color:var(--blue)" title="Rovnako golov v oboch polcasoch">Rov</th>'+
+    '<th style="color:var(--green)" title="Zapasy kde 2.Polcas mal viac golov">2.P&#8593;</th>'+
+    '<th style="text-align:right;padding-right:0.45rem" title="Poslednych N zapasov">Forma</th>'+
+    '</tr></thead><tbody>';
+  if(!rows.length){html+='<tr><td colspan="7" class="no-data">Ziadne data</td></tr>';}
+  else{
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i],streaks=getHtCompStreaks(r.name,role,maxDots);
+      html+='<tr class="clickable-team" onclick="openHtCompModal(\''+esc(r.name)+'\',\''+role+'\')">'+
+        '<td class="rank-num">'+(i+1)+'</td>'+
+        '<td class="left col-team"><span class="team-name-text" title="'+r.name+'">'+shortN(r.name)+'</span></td>'+
+        '<td>'+r.played+'</td>'+
+        '<td style="color:var(--gold);font-weight:700">'+r.ht1more+'</td>'+
+        '<td style="color:var(--blue)">'+r.equal+'</td>'+
+        '<td style="color:var(--green);font-weight:700">'+r.ht2more+'</td>'+
+        '<td style="padding-right:0.45rem"><div class="streaks">'+renderDots(streaks,'comp')+'</div></td></tr>';
+    }
+  }
+  return html+'</tbody></table></div></div>';
+}
+
+function renderBttsCard(label,gf1,gf2,role,maxDots,sortBy){
+  var rows=buildBttsTable(gf1,gf2,role);
+  rows.sort(function(a,b){
+    if(sortBy==='pct_desc')return pct(b.bttsYes,b.played)-pct(a.bttsYes,a.played);
+    if(sortBy==='pct_asc')return pct(a.bttsYes,a.played)-pct(b.bttsYes,b.played);
+    return b.bttsYes-a.bttsYes||a.name.localeCompare(b.name);
+  });
+  var html='<div class="tbl-card">'+
+    '<div class="tbl-head"><span class="tbl-head-label">'+label+'</span>'+
+    '<span class="badge" style="background:rgba(61,220,132,0.14);color:var(--green)">BTTS</span></div>'+
+    '<div class="tbl-scroll">'+
+    '<table><thead><tr><th class="left" style="width:18px" title="Poradie">#</th>'+
+    '<th class="left col-team" title="Nazov timu">Tim</th>'+
+    '<th title="Zapasy">Z</th><th style="color:var(--green)" title="Oba timy skorovali">&#10004;</th>'+
+    '<th style="color:var(--red)" title="Aspon jeden tim neskoroval">&#10007;</th>'+
+    '<th style="text-align:right" title="Percento BTTS zapasov">% BTTS</th>'+
+    '<th style="text-align:right;padding-right:0.45rem" title="Poslednych N zapasov">Forma</th>'+
+    '</tr></thead><tbody>';
+  if(!rows.length){html+='<tr><td colspan="7" class="no-data">Ziadne data</td></tr>';}
+  else{
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i],streaks=getBttsStreaks(r.name,gf1,gf2,role,maxDots);
+      html+='<tr class="clickable-team" onclick="openBttsModal(\''+esc(r.name)+'\',\''+label+'\',\''+role+'\')">'+
+        '<td class="rank-num">'+(i+1)+'</td>'+
+        '<td class="left col-team"><span class="team-name-text" title="'+r.name+'">'+shortN(r.name)+'</span></td>'+
+        '<td>'+r.played+'</td>'+
+        '<td style="color:var(--green);font-weight:700">'+r.bttsYes+'</td>'+
+        '<td style="color:var(--red)">'+r.bttsNo+'</td>'+
+        '<td style="text-align:right">'+renderPct(r.bttsYes,r.played)+'</td>'+
+        '<td style="padding-right:0.45rem"><div class="streaks">'+renderDots(streaks,'btts')+'</div></td></tr>';
+    }
+  }
+  return html+'</tbody></table></div></div>';
+}
+
+// ── Over/Under tables ──
+function buildOUTable(ctx, line) {
+  var tl=getTeamsList(), stats={};
+  for(var i=0;i<tl.length;i++) stats[tl[i]]={name:tl[i],played:0,over:0,under:0};
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i], tot=ctx.total(m);
+    var isOver=tot>line;
+    if(ctx.role==='both'||ctx.role==='home'){if(stats[m.home]){stats[m.home].played++;if(isOver)stats[m.home].over++;else stats[m.home].under++;}}
+    if(ctx.role==='both'||ctx.role==='away'){if(stats[m.away]){stats[m.away].played++;if(isOver)stats[m.away].over++;else stats[m.away].under++;}}
+  }
+  var rows=[]; for(var k in stats){if(stats[k].played>0)rows.push(stats[k]);}
+  return rows;
+}
+
+function getOUStreaks(name, ctx, line, maxDots) {
+  var arr=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===name,isA=m.away===name;
+    if(!isH&&!isA)continue;
+    if(ctx.role==='home'&&!isH)continue;
+    if(ctx.role==='away'&&!isA)continue;
+    arr.push(ctx.total(m)>line);
+  }
+  return arr.slice(-maxDots);
+}
+
+function getOUStreak(name, ctx, line) {
+  var arr=[];
+  for(var i=matches.length-1;i>=0;i--){
+    var m=matches[i],isH=m.home===name,isA=m.away===name;
+    if(!isH&&!isA)continue;
+    if(ctx.role==='home'&&!isH)continue;
+    if(ctx.role==='away'&&!isA)continue;
+    arr.push(ctx.total(m)>line);
+  }
+  if(!arr.length)return{count:0,type:'none'};
+  var first=arr[0],count=0;
+  for(var i=0;i<arr.length;i++){if(arr[i]===first)count++;else break;}
+  return{count:count,type:first?'yes':'no'};
+}
+
+function renderOUCard(ctx, line, sortBy, maxDots) {
+  var rows=buildOUTable(ctx,line);
+  rows.sort(function(a,b){
+    if(sortBy==='pct_desc'||sortBy==='streak_desc') return pct(b.over,b.played)-pct(a.over,a.played);
+    if(sortBy==='pct_asc'||sortBy==='streak_asc') return pct(a.over,a.played)-pct(b.over,b.played);
+    if(sortBy==='played_desc') return b.played-a.played;
+    return b.over-a.over||a.name.localeCompare(b.name);
+  });
+  var lineStr=line+'';
+  var overColor='var(--green)',underColor='var(--red)';
+  var html='<div class="tbl-card">'+
+    '<div class="tbl-head">'+
+      '<span class="tbl-head-label">'+ctx.label+'</span>'+
+      '<span class="badge" style="background:rgba(74,158,255,0.15);color:var(--blue)">O/U '+lineStr+'</span>'+
+    '</div>'+
+    '<div class="tbl-scroll">'+
+    '<table><thead><tr>'+
+    '<th class="left" style="width:18px" title="Poradie">#</th>'+
+    '<th class="left col-team" title="Nazov timu">Tim</th>'+
+    '<th title="Zapasy">Z</th>'+
+    '<th style="color:'+overColor+'" title="Over '+lineStr+' - celkovy pocet golov bol viac ako '+lineStr+'">Ov'+lineStr+'</th>'+
+    '<th style="color:'+underColor+'" title="Under '+lineStr+' - celkovy pocet golov bol menej ako '+lineStr+'">Un'+lineStr+'</th>'+
+    '<th style="text-align:right" title="Percento Over zapasov">% Ov</th>'+
+    '<th title="Aktualna seria Over/Under" style="text-align:center">Seria</th>'+
+    '<th style="text-align:right;padding-right:0.45rem" title="Poslednych N zapasov, zelena=Over, cervena=Under">Forma</th>'+
+    '</tr></thead><tbody>';
+  if(!rows.length){html+='<tr><td colspan="8" class="no-data">Ziadne data</td></tr>';}
+  else{
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i];
+      var streaks=getOUStreaks(r.name,ctx,line,maxDots);
+      var streak=getOUStreak(r.name,ctx,line);
+      var sBadge=streak.count?
+        '<span style="font-family:Oswald,sans-serif;font-size:0.82rem;color:'+(streak.type==='yes'?overColor:underColor)+';background:'+(streak.type==='yes'?'rgba(61,220,132,0.12)':'rgba(255,85,85,0.12)')+';border-radius:4px;padding:0.05rem 0.35rem">'+(streak.type==='yes'?'Ov':'Un')+streak.count+'</span>':
+        '<span style="color:var(--muted);font-size:0.7rem">&#8212;</span>';
+      // dots: true=over(green), false=under(red)
+      var dotHtml='';
+      for(var j=0;j<streaks.length;j++){
+        dotHtml+='<span class="dot '+(streaks[j]?'dot-btts-yes':'dot-btts-no')+'" title="'+(streaks[j]?'Over '+lineStr:'Under '+lineStr)+'"></span>';
+      }
+      html+='<tr class="clickable-team" onclick="openOUModal(\''+esc(r.name)+'\',\''+ctx.key+'\','+line+')">'+
+        '<td class="rank-num">'+(i+1)+'</td>'+
+        '<td class="left col-team"><span class="team-name-text" title="'+r.name+'">'+shortN(r.name)+'</span></td>'+
+        '<td>'+r.played+'</td>'+
+        '<td style="color:'+overColor+';font-weight:700">'+r.over+'</td>'+
+        '<td style="color:'+underColor+'">'+r.under+'</td>'+
+        '<td style="text-align:right">'+renderPct(r.over,r.played)+'</td>'+
+        '<td style="text-align:center">'+sBadge+'</td>'+
+        '<td style="padding-right:0.45rem"><div class="streaks">'+dotHtml+'</div></td></tr>';
+    }
+  }
+  return html+'</tbody></table></div></div>';
+}
+
+function openOUModal(teamName, ctxKey, line) {
+  var ctx=null;
+  for(var i=0;i<OU_CONTEXTS.length;i++){if(OU_CONTEXTS[i].key===ctxKey){ctx=OU_CONTEXTS[i];break;}}
+  if(!ctx)return;
+  document.getElementById('modalTitle').textContent=teamName;
+  document.getElementById('modalSub').textContent=ctx.label+' · Linka: '+line;
+  var maxDots=parseInt(document.getElementById('streakCount').value)||6;
+  var sArr=getOUStreaks(teamName,ctx,line,maxDots);
+  var yes=sArr.filter(function(v){return v;}).length;
+  var dotHtml=''; for(var i=0;i<sArr.length;i++) dotHtml+='<span class="dot '+(sArr[i]?'dot-btts-yes':'dot-btts-no')+'" title="'+(sArr[i]?'Over '+line:'Under '+line)+'"></span>';
+  var sHtml='<div class="modal-streak-row"><span class="modal-streak-label">O/U forma:</span>'+
+    '<div class="streaks">'+dotHtml+'</div>'+
+    '<span style="font-size:0.68rem;color:var(--muted);margin-left:0.5rem">Over: '+yes+'/'+sArr.length+' ('+pct(yes,sArr.length)+'%)</span></div>';
+  var ctx2='<div class="modal-context">'+ctx.label+' · Linka '+line+'</div>';
+  var rows='';
+  var mList=[];
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i],isH=m.home===teamName,isA=m.away===teamName;
+    if(!isH&&!isA)continue;
+    if(ctx.role==='home'&&!isH)continue;
+    if(ctx.role==='away'&&!isA)continue;
+    mList.push({m:m,isH:isH,isOver:ctx.total(m)>line});
+  }
+  mList.reverse();
+  for(var i=0;i<mList.length;i++) rows+=buildMatchRow(mList[i].m,mList[i].isH,mList[i].isOver,true);
+  document.getElementById('modalBody').innerHTML=sHtml+ctx2+(rows||'<div class="no-data">Ziadne zapasy</div>');
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function getCurrentStreak(name, def, goalFilter) {
+  var arr = [];
+  for (var i = matches.length-1; i >= 0; i--) {
+    var m=matches[i], isH=m.home===name, isA=m.away===name;
+    if (!isH&&!isA) continue;
+    if (def.role==='home'&&!isH) continue;
+    if (def.role==='away'&&!isA) continue;
+    var gh=def.ghFn(m), ga_v=def.gaFn(m);
+    var tg = isH ? gh : ga_v;
+    if (goalFilter<0) {
+      var ftTeam = isH ? m.ft1 : m.ft2;
+      var ftOpp  = isH ? m.ft2 : m.ft1;
+      arr.push(ftTeam>ftOpp?'w':ftTeam===ftOpp?'d':'l');
+    } else {
+      arr.push(goalFilter===6?tg>=6:tg===goalFilter);
+    }
+  }
+  if (!arr.length) return {count:0, type:'none'};
+  var first = arr[0];
+  var count = 0;
+  for (var i=0; i<arr.length; i++) {
+    if (arr[i] === first) count++;
+    else break;
+  }
+  if (first==='w'||first==='d'||first==='l') return {count:count, type:first};
+  return {count:count, type:first?'yes':'no'};
+}
+
+var BTTS_CONF={
+  btts_ft:  {label:'BTTS Celkovo (FT)',   gf1:function(m){return m.ft1;},gf2:function(m){return m.ft2;},role:'both'},
+  btts_ht:  {label:'BTTS 1. Polcas (HT)', gf1:function(m){return m.ht1;},gf2:function(m){return m.ht2;},role:'both'},
+  btts_ht2: {label:'BTTS 2. Polcas',      gf1:function(m){return m.ht2_1;},gf2:function(m){return m.ht2_2;},role:'both'},
+  btts_home:{label:'BTTS Doma (FT)',      gf1:function(m){return m.ft1;},gf2:function(m){return m.ft2;},role:'home'},
+  btts_away:{label:'BTTS Von (FT)',       gf1:function(m){return m.ft2;},gf2:function(m){return m.ft1;},role:'away'}
+};
+
+// ─── TOP zo vsetkych lig (modal) ───
+function openTopModal() {
+  var tt  = document.getElementById('tableType').value;
+  var gf  = parseInt(document.getElementById('goalFilter').value);
+  var sb  = document.getElementById('sortBy').value;
+  var cnt = parseInt(document.getElementById('topCount').value) || 1;
+
+  saveCurrentToLeague();
+  var gStr = gf>=0?(gf===6?'6+':gf)+'G':'';
+  var html = '';
+
+  // ── Determine mode ──
+  var mode = 'standard'; // standard | htcomp | btts | ou
+  var bttsConf = BTTS_CONF[tt] || null;
+  var ouCtx = null;
+  for(var i=0;i<OU_CONTEXTS.length;i++){if(OU_CONTEXTS[i].key===tt){ouCtx=OU_CONTEXTS[i];break;}}
+  if(tt==='htcomp') mode='htcomp';
+  else if(bttsConf) mode='btts';
+  else if(ouCtx) mode='ou';
+
+  // ── Collect defKeys for standard mode ──
+  var defKeys=[];
+  if(mode==='standard'){
+    if(tt==='all'){for(var i=0;i<TABLE_DEFS.length;i++)defKeys.push(TABLE_DEFS[i].key);}
+    else{defKeys=[tt];}
+  }
+
+  // helper: th cell
+  var th=function(txt,title,extra){return '<th style="padding:0.3rem 0.4rem;color:var(--muted);font-size:0.62rem;text-transform:uppercase'+(extra?';'+extra:'')+'"'+(title?' title="'+title+'"':'')+'>'+txt+'</th>';};
+  var thLeft=function(txt,title){return '<th class="left" style="padding:0.3rem 0.4rem;color:var(--muted);font-size:0.62rem;text-transform:uppercase"'+(title?' title="'+title+'"':'')+'>'+txt+'</th>';};
+  var td=function(val,extra){return '<td style="text-align:center;padding:0.38rem 0.4rem'+(extra?';'+extra:'')+'">'+(val!==undefined?val:'')+'</td>';};
+  var tdLeft=function(val,extra){return '<td class="left" style="padding:0.38rem 0.4rem'+(extra?';'+extra:'')+'">'+(val!==undefined?val:'')+'</td>';};
+  var rankBadgeFn=function(rank){return cnt>1?'<span style="font-size:0.65rem;background:rgba(240,192,64,0.15);color:var(--gold);border-radius:3px;padding:0.02rem 0.28rem;margin-left:0.25rem">#'+rank+'</span>':'';}
+
+  var ids=Object.keys(leagues);
+
+  // ══ STANDARD ══
+  for(var di=0;di<defKeys.length;di++){
+    var defKey=defKeys[di], def=null;
+    for(var i=0;i<TABLE_DEFS.length;i++){if(TABLE_DEFS[i].key===defKey){def=TABLE_DEFS[i];break;}}
+    if(!def)continue;
+
+    var entries=[];
+    for(var k=0;k<ids.length;k++){
+      var lid=ids[k],lg=leagues[lid];
+      if(!lg.matches||!lg.matches.length)continue;
+      var sm=matches,st=teams; matches=lg.matches;teams=lg.teams;
+      var rows=buildTableForDef(def,gf);
+      rows.sort(function(a,b){
+        if(sb==='goals_asc')return a.gf-b.gf||a.name.localeCompare(b.name);
+        if(sb==='goals_desc')return b.gf-a.gf||a.name.localeCompare(b.name);
+        if(sb==='points_asc')return a.points-b.points||a.gf-b.gf;
+        if(sb==='played_desc')return b.played-a.played||b.points-a.points;
+        if(sb==='streak_desc'||sb==='streak_asc'){var sa=getStreakVal(a.name,def,gf),sb2=getStreakVal(b.name,def,gf),d=Math.abs(sb2)-Math.abs(sa);return sb==='streak_desc'?d:-d;}
+        return b.points-a.points||b.gf-a.gf;
+      });
+      var allR=buildTableForDef(def,-1);
+      var topRows=rows.slice(0,cnt);
+      for(var ti=0;ti<topRows.length;ti++){
+        var r=topRows[ti];
+        var sv=getStreakVal(r.name,def,gf);
+        var totalRec=null;for(var j=0;j<allR.length;j++){if(allR[j].name===r.name){totalRec=allR[j];break;}}
+        entries.push({lid:lid,name:lg.name,flag:lg.flag,team:r.name,row:r,totalPlayed:totalRec?totalRec.played:r.played,rank:ti+1,sv:sv});
+      }
+      matches=sm;teams=st;
+    }
+    if(!entries.length)continue;
+    entries.sort(function(a,b){
+      var ra=a.row,rb=b.row;
+      if(sb==='goals_asc')return ra.gf-rb.gf;if(sb==='goals_desc')return rb.gf-ra.gf;
+      if(sb==='points_asc')return ra.points-rb.points;if(sb==='played_desc')return rb.played-ra.played;
+      if(sb==='streak_desc'||sb==='streak_asc'){var d=Math.abs(b.sv||0)-Math.abs(a.sv||0);return sb==='streak_desc'?d:-d;}
+      return rb.points-ra.points||rb.gf-ra.gf;
+    });
+    html+='<div style="margin-bottom:1.2rem"><div style="font-family:Oswald,sans-serif;font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);padding:0.4rem 0.2rem;border-bottom:1px solid var(--border);margin-bottom:0.3rem">'+def.label+(gStr?' <span style="font-size:0.7em;color:var(--muted)">('+gStr+')</span>':'')+'</div>'+
+      '<table style="width:100%;font-size:0.79rem;border-collapse:collapse"><thead><tr>'+thLeft('#')+thLeft('Liga')+thLeft('Tim')+th('Z','Zapasy')+th('V','Vyhry','color:var(--green)')+th('R','Remisy','color:var(--gold)')+th('P','Prehry','color:var(--red)')+th('GF','Goly strelene')+th('GA','Goly inkasovane')+th('B','Body')+th('%','Percento zapasov s filtrom','text-align:right')+th('Seria','Aktualna seria','text-align:center')+'</tr></thead><tbody>';
+    for(var i=0;i<entries.length;i++){
+      var e=entries[i],r=e.row,isAct=e.lid===activeId;
+      var pctH=(gf>=0&&e.totalPlayed>0)?renderPct(r.played,e.totalPlayed):'<span style="color:var(--muted)">&#8212;</span>';
+      html+='<tr style="border-bottom:1px solid var(--tbody-border);'+(isAct?'background:rgba(240,192,64,0.05)':'')+'">' +
+        '<td class="rank-num" style="padding:0.38rem 0.4rem">'+(i+1)+'</td>'+
+        tdLeft('<span style="font-size:1rem">'+e.flag+'</span> <span style="font-size:0.75rem;color:'+(isAct?'var(--gold)':'var(--muted)')+'">'+e.name+'</span>')+
+        tdLeft('<span style="font-weight:700;color:var(--white)">'+shortN(e.team)+'</span>'+rankBadgeFn(e.rank))+
+        td(r.played)+td(r.wins,'color:var(--green)'+';font-weight:700')+td(r.draws,'color:#f0b040')+td(r.losses,'color:var(--red)')+
+        td('<span class="goals-num">'+r.gf+'</span>')+td(r.ga,'color:var(--muted)')+td('<span class="pts">'+r.points+'</span>')+
+        '<td style="text-align:right;padding:0.38rem 0.4rem">'+pctH+'</td>'+
+        td(renderStreakBadge({count:Math.abs(e.sv||0),type:e.sv>0?'w':e.sv<0?'l':'none'}))+
+      '</tr>';
+    }
+    html+='</tbody></table></div>';
+  }
+
+  // ══ HTCOMP ══
+  if(mode==='htcomp'){
+    var htRoles=[{r:'both',l:'Celkovo'},{r:'home',l:'Doma'},{r:'away',l:'Von'}];
+    for(var ri=0;ri<htRoles.length;ri++){
+      var role=htRoles[ri].r, roleLabel=htRoles[ri].l;
+      var entries=[];
+      for(var k=0;k<ids.length;k++){
+        var lid=ids[k],lg=leagues[lid];
+        if(!lg.matches||!lg.matches.length)continue;
+        var sm=matches,st=teams;matches=lg.matches;teams=lg.teams;
+        var rows=buildHtCompTable(role);
+        rows.sort(function(a,b){return b.ht1more-a.ht1more||a.name.localeCompare(b.name);});
+        var topRows=rows.slice(0,cnt);
+        for(var ti=0;ti<topRows.length;ti++){var r=topRows[ti];entries.push({lid:lid,name:lg.name,flag:lg.flag,team:r.name,row:r,rank:ti+1});}
+        matches=sm;teams=st;
+      }
+      if(!entries.length)continue;
+      html+='<div style="margin-bottom:1.2rem"><div style="font-family:Oswald,sans-serif;font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);padding:0.4rem 0.2rem;border-bottom:1px solid var(--border);margin-bottom:0.3rem">HT1 vs HT2 '+roleLabel+'</div>'+
+        '<table style="width:100%;font-size:0.79rem;border-collapse:collapse"><thead><tr>'+thLeft('#')+thLeft('Liga')+thLeft('Tim')+th('Z','Zapasy')+th('1P↑','Viac golov v 1.Polcase','color:var(--gold)')+th('Rov','Rovnako golov','color:var(--blue)')+th('2P↑','Viac golov v 2.Polcase','color:var(--green)')+'</tr></thead><tbody>';
+      for(var i=0;i<entries.length;i++){
+        var e=entries[i],r=e.row,isAct=e.lid===activeId;
+        html+='<tr style="border-bottom:1px solid var(--tbody-border);'+(isAct?'background:rgba(240,192,64,0.05)':'')+'">' +
+          '<td class="rank-num" style="padding:0.38rem 0.4rem">'+(i+1)+'</td>'+
+          tdLeft('<span style="font-size:1rem">'+e.flag+'</span> <span style="font-size:0.75rem;color:'+(isAct?'var(--gold)':'var(--muted)')+'">'+e.name+'</span>')+
+          tdLeft('<span style="font-weight:700;color:var(--white)">'+shortN(e.team)+'</span>'+rankBadgeFn(e.rank))+
+          td(r.played)+td(r.ht1more,'color:var(--gold);font-weight:700')+td(r.equal,'color:var(--blue)')+td(r.ht2more,'color:var(--green);font-weight:700')+
+        '</tr>';
+      }
+      html+='</tbody></table></div>';
+    }
+  }
+
+  // ══ BTTS ══
+  if(mode==='btts'){
+    var entries=[];
+    for(var k=0;k<ids.length;k++){
+      var lid=ids[k],lg=leagues[lid];
+      if(!lg.matches||!lg.matches.length)continue;
+      var sm=matches,st=teams;matches=lg.matches;teams=lg.teams;
+      var rows=buildBttsTable(bttsConf.gf1,bttsConf.gf2,bttsConf.role);
+      rows.sort(function(a,b){return pct(b.bttsYes,b.played)-pct(a.bttsYes,a.played)||b.bttsYes-a.bttsYes;});
+      var topRows=rows.slice(0,cnt);
+      for(var ti=0;ti<topRows.length;ti++){var r=topRows[ti];entries.push({lid:lid,name:lg.name,flag:lg.flag,team:r.name,row:r,rank:ti+1});}
+      matches=sm;teams=st;
+    }
+    entries.sort(function(a,b){return pct(b.row.bttsYes,b.row.played)-pct(a.row.bttsYes,a.row.played);});
+    html+='<div style="margin-bottom:1.2rem"><div style="font-family:Oswald,sans-serif;font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);padding:0.4rem 0.2rem;border-bottom:1px solid var(--border);margin-bottom:0.3rem">'+bttsConf.label+'</div>'+
+      '<table style="width:100%;font-size:0.79rem;border-collapse:collapse"><thead><tr>'+thLeft('#')+thLeft('Liga')+thLeft('Tim')+th('Z','Zapasy')+th('✔','BTTS - oba timy skorovali','color:var(--green)')+th('✗','Aspon jeden tim neskoroval','color:var(--red)')+th('%BTTS','Percento BTTS zapasov','text-align:right')+'</tr></thead><tbody>';
+    for(var i=0;i<entries.length;i++){
+      var e=entries[i],r=e.row,isAct=e.lid===activeId;
+      html+='<tr style="border-bottom:1px solid var(--tbody-border);'+(isAct?'background:rgba(240,192,64,0.05)':'')+'">' +
+        '<td class="rank-num" style="padding:0.38rem 0.4rem">'+(i+1)+'</td>'+
+        tdLeft('<span style="font-size:1rem">'+e.flag+'</span> <span style="font-size:0.75rem;color:'+(isAct?'var(--gold)':'var(--muted)')+'">'+e.name+'</span>')+
+        tdLeft('<span style="font-weight:700;color:var(--white)">'+shortN(e.team)+'</span>'+rankBadgeFn(e.rank))+
+        td(r.played)+td(r.bttsYes,'color:var(--green);font-weight:700')+td(r.bttsNo,'color:var(--red)')+
+        '<td style="text-align:right;padding:0.38rem 0.4rem">'+renderPct(r.bttsYes,r.played)+'</td>'+
+      '</tr>';
+    }
+    html+='</tbody></table></div>';
+  }
+
+  // ══ OVER/UNDER ══
+  if(mode==='ou'){
+    for(var li=0;li<OU_LINES.length;li++){
+      var line=OU_LINES[li];
+      var entries=[];
+      for(var k=0;k<ids.length;k++){
+        var lid=ids[k],lg=leagues[lid];
+        if(!lg.matches||!lg.matches.length)continue;
+        var sm=matches,st=teams;matches=lg.matches;teams=lg.teams;
+        var rows=buildOUTable(ouCtx,line);
+        rows.sort(function(a,b){return pct(b.over,b.played)-pct(a.over,a.played)||b.over-a.over;});
+        var topRows=rows.slice(0,cnt);
+        for(var ti=0;ti<topRows.length;ti++){var r=topRows[ti];entries.push({lid:lid,name:lg.name,flag:lg.flag,team:r.name,row:r,rank:ti+1});}
+        matches=sm;teams=st;
+      }
+      if(!entries.length)continue;
+      entries.sort(function(a,b){return pct(b.row.over,b.row.played)-pct(a.row.over,a.row.played);});
+      html+='<div style="margin-bottom:1.2rem"><div style="font-family:Oswald,sans-serif;font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);padding:0.4rem 0.2rem;border-bottom:1px solid var(--border);margin-bottom:0.3rem">'+ouCtx.label+' <span style="color:var(--blue)">· O/U '+line+'</span></div>'+
+        '<table style="width:100%;font-size:0.79rem;border-collapse:collapse"><thead><tr>'+thLeft('#')+thLeft('Liga')+thLeft('Tim')+th('Z','Zapasy')+th('Ov'+line,'Over '+line+' - celkovy pocet golov > '+line,'color:var(--green)')+th('Un'+line,'Under '+line,'color:var(--red)')+th('%Ov','Percento Over zapasov','text-align:right')+'</tr></thead><tbody>';
+      for(var i=0;i<entries.length;i++){
+        var e=entries[i],r=e.row,isAct=e.lid===activeId;
+        html+='<tr style="border-bottom:1px solid var(--tbody-border);'+(isAct?'background:rgba(240,192,64,0.05)':'')+'">' +
+          '<td class="rank-num" style="padding:0.38rem 0.4rem">'+(i+1)+'</td>'+
+          tdLeft('<span style="font-size:1rem">'+e.flag+'</span> <span style="font-size:0.75rem;color:'+(isAct?'var(--gold)':'var(--muted)')+'">'+e.name+'</span>')+
+          tdLeft('<span style="font-weight:700;color:var(--white)">'+shortN(e.team)+'</span>'+rankBadgeFn(e.rank))+
+          td(r.played)+td(r.over,'color:var(--green);font-weight:700')+td(r.under,'color:var(--red)')+
+          '<td style="text-align:right;padding:0.38rem 0.4rem">'+renderPct(r.over,r.played)+'</td>'+
+        '</tr>';
+      }
+      html+='</tbody></table></div>';
+    }
+  }
+
+  if(!html)html='<div class="no-data" style="padding:2rem">Ziadna liga nema data pre tento filter</div>';
+
+  var subParts=[];
+  if(gStr)subParts.push('Filter: '+gStr);
+  var ttLabel=(function(){
+    if(tt==='all')return 'Vsetky tabulky';
+    if(tt==='htcomp')return 'HT1 vs HT2';
+    if(bttsConf)return bttsConf.label;
+    if(ouCtx)return ouCtx.label;
+    for(var i=0;i<TABLE_DEFS.length;i++){if(TABLE_DEFS[i].key===tt)return TABLE_DEFS[i].label;}
+    return tt;
+  })();
+  subParts.push(ttLabel);
+  subParts.push('TOP '+cnt);
+
+  document.getElementById('topModalSub').textContent=subParts.join(' · ');
+  document.getElementById('topModalBody').innerHTML=html;
+  document.getElementById('topModalOverlay').classList.add('open');
+}
+function closeTopModal(){document.getElementById('topModalOverlay').classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeTopModal();}});
+
+function renderAll(){
+  var tt=document.getElementById('tableType').value;
+  var gf=parseInt(document.getElementById('goalFilter').value);
+  var sb=document.getElementById('sortBy').value;
+  var md=parseInt(document.getElementById('streakCount').value)||6;
+  var tc=parseInt(document.getElementById('topCount').value)||0;
+  var grid=document.getElementById('tablesGrid');
+
+  if(!matches.length){
+    grid.innerHTML='<div class="no-data" style="grid-column:1/-1;padding:2rem">Nacitaj vysledky zapasov pre aktivnu ligu...</div>';
+    document.getElementById('filterInfo').textContent='Ziadne data';
+    return;
+  }
+  var html='';
+  if(tt==='htcomp'){
+    html+=renderHtCompCard('(Celkovo)','both');
+    html+=renderHtCompCard('(Doma)','home');
+    html+=renderHtCompCard('(Von)','away');
+  }else if(BTTS_CONF[tt]){
+    var b=BTTS_CONF[tt];
+    html+=renderBttsCard(b.label,b.gf1,b.gf2,b.role,md,sb);
+  }else if(tt.indexOf('ou_')===0){
+    var ctx=null;
+    for(var i=0;i<OU_CONTEXTS.length;i++){if(OU_CONTEXTS[i].key===tt){ctx=OU_CONTEXTS[i];break;}}
+    if(ctx){for(var li=0;li<OU_LINES.length;li++) html+=renderOUCard(ctx,OU_LINES[li],sb,md);}
+  }else{
+    var defs=tt==='all'?TABLE_DEFS:TABLE_DEFS.filter(function(d){return d.key===tt;});
+    for(var i=0;i<defs.length;i++)html+=renderStandardTable(defs[i],gf,sb,md,tc);
+  }
+  grid.innerHTML=html;
+  var gTxt=gf>=0?' · Filter: '+(gf===6?'6+':gf)+'G':'';
+  var lgName=activeId&&leagues[activeId]?leagues[activeId].flag+' '+leagues[activeId].name:'';
+  document.getElementById('filterInfo').textContent=lgName+' · '+matches.length+' zapasov · '+getTeamsList().length+' timov'+gTxt;
+}
+
+// ═══════════════════════════════════════════════
+// QUICK ENTRY
+// ═══════════════════════════════════════════════
+function populateTeamSelects(){
+  var tl=getTeamsList();
+  var ids=['qeHome','qeAway'];
+  for(var k=0;k<ids.length;k++){
+    var sel=document.getElementById(ids[k]);if(!sel)continue;
+    var cur=sel.value;
+    sel.innerHTML='<option value="">'+(ids[k]==='qeHome'?'&#8212; Domaci &#8212;':'&#8212; Hostujuci &#8212;')+'</option>';
+    for(var i=0;i<tl.length;i++){
+      var opt=document.createElement('option');
+      opt.value=tl[i];opt.textContent=tl[i];
+      if(tl[i]===cur)opt.selected=true;
+      sel.appendChild(opt);
+    }
+  }
+}
+function updatePreview(){
+  var home=document.getElementById('qeHome').value;
+  var away=document.getElementById('qeAway').value;
+  var ht1=document.getElementById('qeHT1').value||'0';
+  var ht2=document.getElementById('qeHT2').value||'0';
+  var ft1=document.getElementById('qeFT1').value||'0';
+  var ft2=document.getElementById('qeFT2').value||'0';
+  var prev=document.getElementById('qePreview');
+  if(!home||!away){prev.textContent='Vyber oba timy...';prev.style.color='var(--muted)';return;}
+  if(home===away){prev.textContent='Timy musia byt rozni!';prev.style.color='var(--red)';return;}
+  var warn=(+ft1<+ht1||+ft2<+ht2)?' Konecny < polcas?':'';
+  prev.textContent=home+' - '+away+' '+ht1+':'+ht2+' '+ft1+':'+ft2+warn;
+  prev.style.color=warn?'var(--gold)':'var(--green)';
+}
+function addMatchFromQE(){
+  var home=document.getElementById('qeHome').value;
+  var away=document.getElementById('qeAway').value;
+  var ht1=parseInt(document.getElementById('qeHT1').value)||0;
+  var ht2=parseInt(document.getElementById('qeHT2').value)||0;
+  var ft1=parseInt(document.getElementById('qeFT1').value)||0;
+  var ft2=parseInt(document.getElementById('qeFT2').value)||0;
+  if(!home||!away){alert('Vyber oba timy!');return;}
+  if(home===away){alert('Timy musia byt rozni!');return;}
+  var line=home+' - '+away+' '+ht1+':'+ht2+' '+ft1+':'+ft2;
+  var parsed=parseSingleLine(line);
+  if(!parsed){alert('Chyba spracovania!');return;}
+  matches.push(parsed);
+  if(activeId)leagues[activeId].matches=matches.slice();
+  saveAllLeagues();({line:line,id:Date.now()});
+  if(qeHist.length>10)qeHist.pop();
+  var tb=document.getElementById('resultsBox');
+  tb.value=(tb.value.trim()?tb.value.trim()+'\n':'')+line;
+  setStatus('resultsStatus','Celkom '+matches.length+' zapasov','ok');
+  var rids=['qeHT1','qeHT2','qeFT1','qeFT2'];
+  for(var i=0;i<rids.length;i++)document.getElementById(rids[i]).value='0';
+  updatePreview();renderQEHistory();renderLeagueTabs();renderAll();
+}
+function renderQEHistory(){
+  var list=document.getElementById('qeHistList');if(!list)return;
+  if(!qeHist.length){list.innerHTML='<div style="color:var(--muted);font-size:0.74rem;font-style:italic">Ziadne zaznamy</div>';return;}
+  var html='';
+  for(var i=0;i<qeHist.length;i++){
+    var h=qeHist[i];
+    html+='<div class="qe-hist-item"><span class="qe-hist-score">'+h.line+'</span>'+
+      '<button class="qe-hist-del" onclick="removeQEEntry('+h.id+')">&#10005;</button></div>';
+  }
+  list.innerHTML=html;
+}
+function removeQEEntry(id){
+  var entry=null;
+  for(var i=0;i<qeHist.length;i++){if(qeHist[i].id===id){entry=qeHist[i];break;}}
+  if(!entry)return;
+  var parsed=parseSingleLine(entry.line);
+  if(parsed){
+    var found=-1;
+    for(var i=matches.length-1;i>=0;i--){
+      var m=matches[i];
+      if(m.home===parsed.home&&m.away===parsed.away&&m.ft1===parsed.ft1&&m.ft2===parsed.ft2&&m.ht1===parsed.ht1&&m.ht2===parsed.ht2){found=i;break;}
+    }
+    if(found>=0)matches.splice(found,1);
+    if(activeId)leagues[activeId].matches=matches.slice();
+    saveAllLeagues();
+    var lines=tb.value.split('\n').filter(function(l){return l.trim();});
+    var li=-1;
+    for(var i=lines.length-1;i>=0;i--){if(lines[i].trim()===entry.line.trim()){li=i;break;}}
+    if(li>=0)lines.splice(li,1);
+    tb.value=lines.join('\n');
+    setStatus('resultsStatus','Celkom '+matches.length+' zapasov','ok');
+  }
+  qeHist=qeHist.filter(function(h){return h.id!==id;});
+  renderQEHistory();renderLeagueTabs();renderAll();
+}
+
+// ═══════════════════════════════════════════════
+// VOICE ENTRY
+// ═══════════════════════════════════════════════
+
+var voiceState = {
+  recognition: null,
+  listening: false,
+  rawText: '',
+  parsed: null,
+  editingTeam: null
+};
+
+function voiceCheckPermission() {} // not needed
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    voiceSetStatus('❌ Tento prehliadač nepodporuje hlas. Použi Firefox alebo Chrome.', 'err');
+    return;
+  }
+  if (voiceState.listening) { stopVoice(); } else { startVoice(); }
+}
+
+function startVoice() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = new SR();
+  rec.lang = 'sk-SK';
+  rec.interimResults = true;
+  rec.maxAlternatives = 3;
+  rec.continuous = false;
+
+  var btn = document.getElementById('voiceMicBtn');
+  var tr  = document.getElementById('voiceTranscript');
+
+  voiceState.recognition = rec;
+  voiceState.listening = true;
+  voiceState.rawText = '';
+
+  btn.classList.add('listening');
+  btn.textContent = '⏹';
+  tr.className = 'voice-transcript vactive';
+  tr.textContent = '🎙 Počúvam...';
+  voiceSetStatus('Hovor: Domáci Hosť HT1 HT2 FT1 FT2', '');
+
+  rec.onresult = function(e) {
+    var interim = '', fin = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      var t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) fin += t; else interim += t;
+    }
+    var txt = fin || interim;
+    tr.textContent = txt;
+    document.getElementById('voiceInput').value = txt;
+    if (fin) voiceState.rawText = fin;
+  };
+
+  rec.onend = function() {
+    voiceState.listening = false;
+    btn.classList.remove('listening');
+    btn.textContent = '🎤';
+    tr.className = 'voice-transcript vdone';
+    if (voiceState.rawText) {
+      voiceProcessText(voiceState.rawText);
+    } else {
+      voiceSetStatus('Nič som nepočul — skús znova.', 'warn');
+      tr.className = 'voice-transcript';
+      tr.textContent = 'Tapni 🎤 a povedz výsledok...';
+    }
+  };
+
+  rec.onerror = function(e) {
+    voiceState.listening = false;
+    btn.classList.remove('listening');
+    btn.textContent = '🎤';
+    tr.className = 'voice-transcript';
+    tr.textContent = 'Tapni 🎤 a povedz výsledok...';
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      var sl = document.getElementById('voiceStatusLine');
+      sl.style.color = 'var(--red)';
+      sl.innerHTML = '🔒 Mikrofón nie je povolený.<br>Firefox: Adresný riadok → 🔒 → Mikrofón → Povoliť';
+    } else {
+      var msg = e.error === 'no-speech'    ? '🔇 Nič som nepočul — skús znova.'      :
+                e.error === 'network'      ? '🌐 Chyba siete.'                        :
+                e.error === 'audio-capture'? '🎙 Mikrofón nenájdený.'                 :
+                '⚠ Chyba: ' + e.error;
+      voiceSetStatus(msg, e.error === 'no-speech' ? 'warn' : 'err');
+    }
+  };
+
+  rec.start();
+}
+
+function stopVoice() {
+  if (voiceState.recognition) { try { voiceState.recognition.stop(); } catch(e) {} }
+}
+
+// Word→digit map
+var WORD_NUMS = {
+  'nula':0,'zero':0,'null':0,
+  'jedna':1,'jeden':1,'one':1,
+  'dve':2,'dva':2,'two':2,
+  'tri':3,'three':3,
+  'styri':4,'styry':4,'four':4,
+  'pat':5,'five':5,
+  'sest':6,'six':6,
+  'sedem':7,'seven':7,
+  'osem':8,'eight':8,
+  'devat':9,'nine':9
+};
+
+function wordToNum(w) {
+  var lw = w.toLowerCase().replace(/[^a-z]/g,'');
+  if (WORD_NUMS[lw] !== undefined) return WORD_NUMS[lw];
+  var n = parseInt(w);
+  return isNaN(n) ? null : (n >= 0 && n <= 20 ? n : null);
+}
+
+function fuzzyMatchTeam(query, teamList) {
+  if (!teamList || !teamList.length) return null;
+  var q = query.toLowerCase().trim();
+  var best = null, bestScore = -1;
+  for (var i = 0; i < teamList.length; i++) {
+    var t = teamList[i].toLowerCase();
+    if (t === q) return {team: teamList[i], score: 1};
+    var sc = 0;
+    if (t.startsWith(q) || q.startsWith(t)) sc = 0.92;
+    else if (t.includes(q) || q.includes(t)) sc = 0.80;
+    else {
+      var qw = q.split(' '), tw = t.split(' '), m = 0;
+      for (var j=0;j<qw.length;j++)
+        for (var k=0;k<tw.length;k++)
+          if (qw[j].length>2 && (tw[k].startsWith(qw[j])||qw[j].startsWith(tw[k]))) m++;
+      sc = m > 0 ? 0.5 + m*0.12 : 0;
+    }
+    if (sc > bestScore) { bestScore = sc; best = teamList[i]; }
+  }
+  return bestScore > 0.35 ? {team: best, score: bestScore} : null;
+}
+
+function parseVoiceText(text, teamList) {
+  var words = text.trim().split(/\s+/);
+  if (words.length < 2) return null;
+  var nums = [], numPos = [];
+  for (var i = words.length-1; i >= 0 && nums.length < 4; i--) {
+    var n = wordToNum(words[i]);
+    if (n !== null) { nums.unshift(n); numPos.unshift(i); }
+  }
+  if (nums.length < 2) return null;
+  var ht1, ht2, ft1, ft2, teamEnd;
+  if (nums.length >= 4) {
+    ht1=nums[0]; ht2=nums[1]; ft1=nums[2]; ft2=nums[3]; teamEnd=numPos[0];
+  } else {
+    ft1=nums[0]; ft2=nums[1]; ht1=ft1; ht2=ft2; teamEnd=numPos[0];
+  }
+  var tw = words.slice(0, teamEnd);
+  if (!tw.length) return null;
+  var homeStr='', awayStr='', homeMatch=null, awayMatch=null;
+  if (teamList && teamList.length) {
+    var best = -1;
+    for (var s=1; s<tw.length; s++) {
+      var h=tw.slice(0,s).join(' '), a=tw.slice(s).join(' ');
+      if (!a) continue;
+      var hm=fuzzyMatchTeam(h,teamList), am=fuzzyMatchTeam(a,teamList);
+      if (hm && am && hm.team!==am.team && hm.score+am.score>best) {
+        best=hm.score+am.score; homeMatch=hm; awayMatch=am; homeStr=h; awayStr=a;
+      }
+    }
+    if (!homeMatch) {
+      var mid=Math.max(1,Math.floor(tw.length/2));
+      homeStr=tw.slice(0,mid).join(' '); awayStr=tw.slice(mid).join(' ');
+      homeMatch=fuzzyMatchTeam(homeStr,teamList); awayMatch=fuzzyMatchTeam(awayStr,teamList);
+    }
+  } else {
+    var mid2=Math.max(1,Math.floor(tw.length/2));
+    homeStr=tw.slice(0,mid2).join(' '); awayStr=tw.slice(mid2).join(' ');
+  }
+  return {
+    home: (homeMatch&&homeMatch.score>0.35)?homeMatch.team:homeStr,
+    away: (awayMatch&&awayMatch.score>0.35)?awayMatch.team:awayStr,
+    homeRaw: homeStr, awayRaw: awayStr,
+    homeConf: homeMatch?homeMatch.score:0,
+    awayConf: awayMatch?awayMatch.score:0,
+    ht1:ht1, ht2:ht2, ft1:ft1, ft2:ft2,
+    hasHT: nums.length>=4
+  };
+}
+
+function voiceSetStatus(msg, cls) {
+  var el = document.getElementById('voiceStatusLine');
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.color = cls==='ok'?'var(--green)':cls==='err'?'var(--red)':cls==='warn'?'var(--gold)':'var(--muted)';
+}
+
+// Debounce timer for input
+var voiceInputTimer = null;
+
+function voiceOnInput(val) {
+  clearTimeout(voiceInputTimer);
+  var v = val.trim();
+  if (!v) { voiceHideResult(); voiceSetStatus('', ''); return; }
+  voiceInputTimer = setTimeout(function() { voiceProcessText(v); }, 400);
+}
+
+function voiceFillExample(text) {
+  var inp = document.getElementById('voiceInput');
+  inp.value = text;
+  inp.focus();
+  voiceProcessText(text);
+}
+
+function voiceClearInput() {
+  document.getElementById('voiceInput').value = '';
+  voiceHideResult();
+  voiceSetStatus('', '');
+}
+
+function voiceHideResult() {
+  document.getElementById('voiceResult').style.display = 'none';
+  document.getElementById('voiceTeamPicker').style.display = 'none';
+  voiceState.parsed = null;
+}
+
+function voiceProcessText(text) {
+  var tl = getTeamsList();
+  var parsed = parseVoiceText(text, tl);
+  voiceState.parsed = parsed;
+  if (!parsed) { voiceSetStatus('Nezrozumiteľný formát — skontroluj vstup.', 'warn'); voiceHideResult(); return; }
+  voiceRenderResult(parsed);
+}
+
+function voiceRenderResult(p) {
+  document.getElementById('voiceResult').style.display = 'block';
+  var row = document.getElementById('voiceResultRow');
+  var homeOk = p.homeConf >= 0.5;
+  var awayOk = p.awayConf >= 0.5;
+  row.innerHTML =
+    '<div class="vfield">' +
+      '<div class="vflabel">Domáci</div>' +
+      '<div class="vpill'+(homeOk?'':' bad')+'" onclick="voicePickTeam(&apos;home&apos;)" title="Tapni pre zmenu">'+p.home+'</div>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:0.2rem">' +
+      (p.hasHT?'<div class="vfield"><div class="vflabel">1.P</div><div class="vscore" style="font-size:1rem">'+p.ht1+':'+p.ht2+'</div></div>':'') +
+      '<div class="vfield"><div class="vflabel">'+(p.hasHT?'FT':'Výsledok')+'</div><div class="vscore">'+p.ft1+':'+p.ft2+'</div></div>' +
+    '</div>' +
+    '<div class="vfield">' +
+      '<div class="vflabel">Hosť</div>' +
+      '<div class="vpill'+(awayOk?'':' bad')+'" onclick="voicePickTeam(&apos;away&apos;)" title="Tapni pre zmenu">'+p.away+'</div>' +
+    '</div>';
+  var warns = [];
+  if (!homeOk) warns.push('Domáci "'+p.homeRaw+'" — tapni pre výber');
+  if (!awayOk) warns.push('Hosť "'+p.awayRaw+'" — tapni pre výber');
+  if (!p.hasHT) warns.push('Polčas nezadaný — použitý rovnaký ako FT');
+  voiceSetStatus(warns.length ? '&#9888; '+warns.join(' · ') : '&#10004; Skontroluj a potvrď', warns.length?'warn':'ok');
+  document.getElementById('voiceTeamPicker').style.display = 'none';
+}
+
+function voicePickTeam(side) {
+  voiceState.editingTeam = side;
+  var tl = getTeamsList();
+  var picker = document.getElementById('voiceTeamPicker');
+  var list = document.getElementById('voiceTeamList');
+  document.getElementById('voiceTeamPickerLabel').textContent =
+    'Vyber ' + (side==='home'?'domáci':'hosťujúci') + ' tím:';
+  if (!tl.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:0.78rem">Žiadne tímy — najprv načítaj ligu.</div>';
+  } else {
+    list.innerHTML = tl.map(function(t) {
+      var esc = t.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+      return '<span class="vpill" style="font-size:0.74rem;margin:0.1rem" data-team="'+esc+'" onclick="voiceSelectTeam(this.dataset.team)">' + t + '</span>';
+    }).join('');
+  }
+  picker.style.display = 'block';
+}
+
+function voiceSelectTeam(name) {
+  if (!voiceState.parsed) return;
+  if (voiceState.editingTeam==='home') { voiceState.parsed.home=name; voiceState.parsed.homeConf=1; }
+  else { voiceState.parsed.away=name; voiceState.parsed.awayConf=1; }
+  document.getElementById('voiceTeamPicker').style.display = 'none';
+  voiceRenderResult(voiceState.parsed);
+}
+
+function voiceConfirm() {
+  var p = voiceState.parsed;
+  if (!p || !p.home || !p.away) return;
+  if (p.home === p.away) { voiceSetStatus('Domáci a hosť nemôžu byť rovnaký tím!', 'err'); return; }
+  var line = p.home + ' - ' + p.away + ' ' + p.ht1+':'+p.ht2 + ' ' + p.ft1+':'+p.ft2;
+  var parsed = parseSingleLine(line);
+  if (!parsed) { voiceSetStatus('Chyba — skontroluj skóre.', 'err'); return; }
+  matches.push(parsed);
+  if (activeId) leagues[activeId].matches = matches.slice();
+  saveAllLeagues();
+  var tb = document.getElementById('resultsBox');
+  tb.value = (tb.value.trim()?tb.value.trim()+'\n':'')+line;
+  setStatus('resultsStatus','Celkom '+matches.length+' zapasov','ok');
+  voiceSetStatus('&#10004; Pridané: '+line, 'ok');
+  renderLeagueTabs(); renderAll();
+  voiceReset();
+}
+
+function voiceReset() {
+  voiceState.parsed = null;
+  voiceState.editingTeam = null;
+  document.getElementById('voiceInput').value = '';
+  document.getElementById('voiceResult').style.display = 'none';
+  document.getElementById('voiceTeamPicker').style.display = 'none';
+  setTimeout(function(){ voiceSetStatus('',''); }, 2000);
+}
+
+// BOOT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',function(){
+  applyTheme();
+  initLeagues();
+  // load saved data
+  var saved=null;try{saved=localStorage.getItem('fsapp_leagues');}catch(e){}
+  if(saved){try{var p=JSON.parse(saved);for(var id in p)leagues[id]=p[id];}catch(e){}}
+  var act=null;try{act=localStorage.getItem('fsapp_active');}catch(e){}
+  var target=(act&&leagues[act])?act:Object.keys(leagues)[0];
+  switchLeague(target);
+});
+</script>
+</body>
+</html>
